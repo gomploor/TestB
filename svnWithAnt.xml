@@ -1,0 +1,12 @@
+
+<project name="SVN ANT POC">
+	<property name="svn.ex" location="C:\Program Files\TortoiseSVN\bin\svn.exe" />
+	<property name="svn.root" Value="https://godigital.svn.cloudforge.com/svnroot/Projects/CRM" />
+	
+	<exec executable="${svn.ex}">
+		<arg value="co" />
+		<arg value="${svn.root}/trunk/src/classes" />
+		<arg value="Yfiles" />
+	</exec>
+
+</project>
