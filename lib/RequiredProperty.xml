@@ -1,4 +1,3 @@
-<?xml version="1.0"?>
 <project name="AntMacros">
 	<macrodef name="required-property">
 		<attribute name="name"/>
