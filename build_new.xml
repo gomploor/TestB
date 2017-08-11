@@ -10,7 +10,7 @@
     <import file="lib/RequiredProperty.xml"/>
 	
 	<!-- Begin Sandbox Targets -->
-	<target name="deployToSandbox">
+	<target name="deployToSandbox" depends="requiredSandBoxProperties">
 		<echo message="Deploy to Sandbox action with following parameters set from Jenkins" />
 		<echo message= "sf.test.serverurl  >> ${sf.test.serverurl}"/>
 		<echo message= "sf.test.username  >> ${sf.test.username}"/>
