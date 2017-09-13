@@ -8,7 +8,7 @@ for /r . %%g in (*.wr*) do (
   set "relPath=!absPath:~%len%!"
   del "!relPath!.temp" 2>nul
   echo "Json Pretty >> !relPath!"
-  tidyjson "!relPath!" >> "!relPath!.temp" 
+  python -mjson.tool "!relPath!" >> "!relPath!.temp" 
   del "!relPath!"
   ren "!relPath!.temp" "%%~nxg"
   endlocal
