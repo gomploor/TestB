@@ -70,7 +70,10 @@
 			deployRoot="src"
 			pollWaitMillis="1000"
 			maxPoll="100000"
-			CheckOnly="true">
+			CheckOnly="true"
+			testLevel="RunSpecifiedTests">
+			<runTest>OnBoardFormBeforeInsert_Test</runTest>
+			<runTest>OnBoardFormControllerExt_Test</runTest>
 		</sf:deploy>		
 	</target>
 	
