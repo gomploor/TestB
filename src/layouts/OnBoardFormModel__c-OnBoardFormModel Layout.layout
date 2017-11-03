@@ -1355,14 +1355,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Email_Hosting_sel__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Are_We_Hosting_Email_at_Same_URL_Domain__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Are_Add_l_Pages_Required_Before_Launch__c</field>
             </layoutItems>
             <layoutItems>
@@ -1423,10 +1415,6 @@
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Website_Budget_template_or_mobile_only__c</field>
-            </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Website_Quote_Cost_Custom__c</field>
