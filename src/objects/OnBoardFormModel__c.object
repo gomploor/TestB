@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <fullName>Add_l_Services_Requested__c</fullName>
+        <description>Add&apos;l Services Requested</description>
+        <externalId>false</externalId>
+        <label>Add&apos;l Flex Features Requested</label>
+        <length>2000</length>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>3</visibleLines>
+    </fields>
+    <fields>
+        <fullName>Are_Add_l_Services_Needed_Not_Listed__c</fullName>
+        <description>Are Add&apos;l Services Needed Not Listed?</description>
+        <externalId>false</externalId>
+        <label>Are Add&apos;l Flex Features Required?</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+        <valueSet>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>Yes</fullName>
+                    <default>false</default>
+                    <label>Yes</label>
+                </value>
+                <value>
+                    <fullName>No</fullName>
+                    <default>false</default>
+                    <label>No</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
+    </fields>
+    <fields>
+        <fullName>Domain_Transfer_Fee__c</fullName>
+        <description>Domain Transfer Fee</description>
+        <externalId>false</externalId>
+        <label>Domain Transfer Fee</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+        <valueSet>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>Yes</fullName>
+                    <default>false</default>
+                    <label>Yes</label>
+                </value>
+                <value>
+                    <fullName>No</fullName>
+                    <default>false</default>
+                    <label>No</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
+    </fields>
+    <fields>
+        <fullName>Monthly_Contract_Value__c</fullName>
+        <description>Sum of monthly budgets for all selected products</description>
+        <externalId>false</externalId>
+        <formula>IF(PPC__c, PPC_Budget__c, 0) 
++ 
+IF(SEO__c, SEO_Budget__c, 0) 
++
+IF(Lead_Capture_Pages__c, Lead_Capture_Page_Budget__c, 0) 
++ 
+IF(Social_Advertising__c, Social_Ads_Budget_Month__c, 0) 
++ 
+IF(Social_Media_Management__c, Social_Budget__c, 0)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Monthly Contract Value</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>Total_Contract_Value_Websites__c</fullName>
+        <description>Total contract value for Websites</description>
+        <externalId>false</externalId>
+        <formula>IF(Websites__c, 
+IF(ISPICKVAL(Contract_Length_Months_Websites__c, &apos;Evergreen&apos;), 
+12, 
+VALUE(TEXT(Contract_Length_Months_Websites__c))), 
+0)
++
+Website_Quote_Cost_Custom__c</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Total Contract Value Websites</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+</CustomObject>
