@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <alerts>
+        <fullName>Email_Count_Thank_You_Email</fullName>
+        <description>Email Count Thank You Email</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Affl_Sales_Rep__c</field>
+            <type>contactLookup</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_1__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_2__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_3__c</field>
+            <type>email</type>
+        </recipients>
+        <senderAddress>answers@godigitalmarketing.com</senderAddress>
+        <senderType>OrgWideEmailAddress</senderType>
+        <template>Case_Templates/EmailCountRequest_Thank_You_Email</template>
+    </alerts>
+    <alerts>
+        <fullName>Email_Count_Thank_You_Email_Gannet</fullName>
+        <description>Email Count Thank You Email Gannet</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Affl_Sales_Rep__c</field>
+            <type>contactLookup</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_1__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_2__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_3__c</field>
+            <type>email</type>
+        </recipients>
+        <senderAddress>answers@godigitalmarketing.com</senderAddress>
+        <senderType>OrgWideEmailAddress</senderType>
+        <template>Case_Templates/EmailCountRequest_Thank_You_Email_Gannet</template>
+    </alerts>
+    <rules>
+        <fullName>GL DA EmailCount Request Alert %26 Thank You</fullName>
+        <actions>
+            <name>Email_Count_Thank_You_Email</name>
+            <type>Alert</type>
+        </actions>
+        <active>true</active>
+        <criteriaItems>
+            <field>Case.RecordTypeId</field>
+            <operation>equals</operation>
+            <value>GL Email Count</value>
+        </criteriaItems>
+        <criteriaItems>
+            <field>Case.Media_Partner_Type__c</field>
+            <operation>notEqual</operation>
+            <value>USCP</value>
+        </criteriaItems>
+        <triggerType>onCreateOnly</triggerType>
+    </rules>
+    <rules>
+        <fullName>GL DA EmailCount Request Alert %26 Thank You Gannet</fullName>
+        <actions>
+            <name>Email_Count_Thank_You_Email_Gannet</name>
+            <type>Alert</type>
+        </actions>
+        <active>false</active>
+        <criteriaItems>
+            <field>Case.RecordTypeId</field>
+            <operation>equals</operation>
+            <value>GL Email Count</value>
+        </criteriaItems>
+        <criteriaItems>
+            <field>Case.Media_Partner_Type__c</field>
+            <operation>equals</operation>
+            <value>USCP</value>
+        </criteriaItems>
+        <triggerType>onCreateOnly</triggerType>
+    </rules>
+</Workflow>

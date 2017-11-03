@@ -1,0 +1,35 @@
+Hello {!Case.Affl_Sales_Rep__c}
+
+Your Email Count Request Is Received.  Please contact your designated Jumpstart Specialist with any questions or updates regarding the fulfillment of the email count request. 
+
+Please see below for audit completion timelines:
+
+<15 breakouts: 1.5 Business Days
+16-30 breakouts: 2 Business Days
+31-40 breakouts: 3 Business Days
+41-75 breakouts: 5 Business Days
+75+: Custom Quotes
+
+Note: Breakout = Unique count result.
+
+
+INFORMATION RECEIVED:
+
+Company                -  {!Case.Company_Name__c}
+Case Number         -  {!Case.CaseNumber}
+Media Partner          - {!Case.Media_Partner__c}
+Client's Business Industry              - {!Account.Account_Primary_Industry__c}
+Client's Primary focus                -  {!Account.Account_Primary_Focus__c}
+Sales Rep              - {!Case.Affl_Sales_Rep__c}
+
+Notes                 - {!Case.EC_General_Notes__c}
+Budget                   - {!Case.EC_Email_Budget__c}
+Quantity                 - {!Case.EC_Email_Quantity__c}
+
+Target Demographic   -{!Case.EC_Target_Demographic__c}
+Target Geo Type           -{!Case.EC_Target_Geo_Type__c}
+Target Radius (miles)  -{!Case.Target_Radius_miles__c}
+Zip Code                       - {!Case.EC_Radius_Zip_Code__c}
+Target DMA                   -{!Case.EC_Target_DMA__c}
+Target State                   -{!Case.EC_Target_State__c}
+Target County               -{!Case.EC_Target_County__c}
