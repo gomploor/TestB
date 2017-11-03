@@ -3283,24 +3283,6 @@
                                 columns="1"
                                 rendered="{!AND(OnBoardFormModel__c.Websites__c, OnBoardFormModel__c.Website_Option__c == 'Custom Website')}">
                                 <apex:pageBlockSection columns="2" html-class="formData">
-                                    <!-- Email Hosting -->
-                                    <apex:pageBlockSection columns="1" id="emailhostingCWSection">
-                                        <apex:outputLabel value="Email Hosting"
-                                            styleClass="subsectionBlue" />
-
-                                        <apex:pageBlockSectionItem >
-                                            <apex:outputLabel value="Are we hosting email at same URL/domain?" />
-                                            <apex:actionRegion >
-                                                <apex:inputField value="{!OnBoardFormModel__c.Are_We_Hosting_Email_at_Same_URL_Domain__c}"
-                                                    required="true" taborderhint="13"
-                                                    label="Are we hosting email at same URL/domain?" html-automationid="ObfHostingEmailAtSameUrlDomainIn">
-                                                    <apex:actionSupport event="onchange"
-                                                        rerender="emailhostingCWSection" status="status" />
-                                                </apex:inputField>
-                                            </apex:actionRegion>
-                                        </apex:pageBlockSectionItem>
-                                    </apex:pageBlockSection>
-
                                     <!-- Notes -->
                                     <apex:pageBlockSection columns="1">
                                         <apex:inputField value="{!OnBoardFormModel__c.Notes_Websites__c}"

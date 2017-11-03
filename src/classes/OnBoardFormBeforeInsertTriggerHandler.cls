@@ -231,7 +231,6 @@ public class OnBoardFormBeforeInsertTriggerHandler extends TriggerHandlerBase {
             oneRecord.Link_to_Proposal__c = null;
             oneRecord.Website_Quote_Cost_Custom__c = null;
             oneRecord.Contract_Length_Months_Websites__c = null;
-            oneRecord.Client_Email_Provider_Name__c = null;
             oneRecord.Use_Existing_URL__c = null;
             oneRecord.Domain_Name__c = null;
             oneRecord.Domain_Registrar__c = null;
