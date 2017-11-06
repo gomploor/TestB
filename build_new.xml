@@ -74,6 +74,7 @@
 			testLevel="RunSpecifiedTests">
 			<runTest>OnBoardFormBeforeInsert_Test</runTest>
 			<runTest>OnBoardFormControllerExt_Test</runTest>
+			<runTest>DigitalAuditExtension_Test</runTest>			
 		</sf:deploy>		
 	</target>
 	

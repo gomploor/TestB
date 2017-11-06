@@ -1,0 +1,937 @@
+<apex:page standardController="Case" showHeader="false" sidebar="false" extensions="DigitalAuditExtension">
+   
+    <apex:includeScript value="{!URLFOR($Resource.ulPicklist, '/jquery-1.7.2.min.js')}"  />
+    <apex:includeScript value="{!URLFOR($Resource.ulPicklist, '/ulPickList.js')}"  />
+    <apex:includeScript value="{!URLFOR($Resource.poshytip, '/jquery.poshytip.js')}"  />
+    <apex:includeScript value="{!$Resource.jqueryMaskedinput}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.poshytip, '/tip-yellow/tip-yellow.css')}"/>
+    <style>
+ul.container-list {
+    width: 200px;
+    min-heigth: 300px;
+    border: 1px solid gray;
+    overflow-x: auto;
+    overflow-y: scroll;
+    display: block;
+    list-style : none;
+    color : black;
+    padding : 0px;
+    background-color : white;
+    margin-right: 15px;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+
+ul.container-list li {
+    padding : 2px;
+    margin : 0px;
+    cursor : pointer;
+    border-bottom : 1px #EEE solid;
+    font-size: 0.9em;
+}
+
+</style>
+    <Script>
+        var j$ = jQuery.noConflict();
+        function showLoadingDiv() {
+            var newHeight = j$("[id$=DigitalAuditFormId]").css("height");//Just shade the body, not the header
+            j$("[id$=loading-curtain-div]").css("background-color", "black")
+                    .css("opacity", 0.35).css("height", "100%").css("width",
+                            "100%").css("display", "inline");
+        }
+        function hideLoadingDiv() {
+            j$("[id$=loading-curtain-div]").css("background-color", "black")
+                    .css("opacity", "1").css("height", "0px").css("width",
+                            "100%").css("display", "none");
+        }
+        //http://forceadventure.wordpress.com/2013/07/19/uploading-attachments-to-salesforce-using-javascript-remoting/
+        //Maximum String length of 6 million characters in apex code 
+        //This means a functional limit of a file size of about 4.3 MB
+        function uploadFile(inputFileId, attachmentNameId, attachmentBodyId,
+                attachmentContentTypeId) {
+            var input = document.getElementById(inputFileId);
+            var filesToUpload = input.files;
+            var maxStringSize = 6000000; //Maximum String size is 6,000,000 characters
+            var maxFileSize = 4500000; //After Base64 Encoding, this is the max file size
+
+            for ( var i = 0, onefile; onefile = filesToUpload[i]; i++) {
+                var reader = new FileReader();
+                // Keep a reference to the File in the FileReader so it can be accessed in callbacks
+                reader.file = onefile;
+
+                var ext = onefile.name
+                        .substring(onefile.name.lastIndexOf('.') + 1);
+                if (ext.toLowerCase() == 'exe') {
+                    alert('Sorry, Executable files cannot be uploaded');
+                    input.value = '';
+                    return false;
+                }
+
+                if (onefile.size > maxFileSize) {
+                    alert('File must be under 4.3 MB in size.  Your file is too large.  Please try again.');
+                    input.value = '';
+                    return false;
+                }
+                reader.onerror = function(e) {
+                    switch (e.target.error.code) {
+                    case e.target.error.NOT_FOUND_ERR:
+                        alert('File Not Found!');
+                        break;
+                    case e.target.error.NOT_READABLE_ERR:
+                        alert('File is not readable');
+                        break;
+                    case e.target.error.ABORT_ERR:
+                        break; // noop
+                    default:
+                        alert('An error occurred reading this file.');
+                    }
+                    ;
+                };
+
+                reader.onabort = function(e) {
+                    alert('File read cancelled');
+                };
+
+                reader.onload = function(e) {
+                    document.getElementById(attachmentNameId).value = this.file.name;
+                    document.getElementById(attachmentContentTypeId).value = this.file.type;
+                    document.getElementById(attachmentBodyId).value = window
+                            .btoa(this.result);
+                    ;
+                };
+                reader.readAsBinaryString(onefile);
+            }
+        }
+
+        //Clear attachment fields when something is attached and user didnot click on upload instead clicked on submit
+        function clearAttachments() {
+            //Clearing hidden controls that have html-clearfileattachment="true" attibute
+            j$('input[clearfileattachment="true"]').each(function() {
+                this.value = '';
+                //alert( this.value );
+            });
+
+            //Clearing all file attachments content
+            j$('input[type="file"]').each(function() {
+                this.value = '';
+                //alert( this.value );
+            });
+            return true;
+
+        }
+        
+        function inputLimiter(e, allow) {
+            var AllowableCharacters = '';
+
+            if (allow == 'Letters') {
+                AllowableCharacters = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            }
+            if (allow == 'Numbers') {
+                AllowableCharacters = '1234567890';
+            }
+            if (allow == 'NameCharacters') {
+                AllowableCharacters = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-.\'';
+            }
+            if (allow == 'NameCharactersAndNumbers') {
+                AllowableCharacters = '1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-\'';
+            }
+            if (allow == 'Currency') {
+                AllowableCharacters = '1234567890.';
+            }
+            if(allow == 'NumbersWithComma'){
+                AllowableCharacters = '1234567890,-';
+            }
+
+            var k = document.all ? parseInt(e.keyCode) : parseInt(e.which);
+            if (k != 13 && k != 8 && k != 0) {
+                if ((e.ctrlKey == false) && (e.altKey == false)) {
+                    return (AllowableCharacters.indexOf(String.fromCharCode(k)) != -1);
+                } else {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        //DEV-7319 Starts 
+        function inputCharLimit(field, fieldLength) {
+            document.getElementById(field).maxLength = fieldLength;
+            var fieldValue = document.getElementById(field).value;
+            if(fieldValue.includes(',') || fieldValue.includes('.')) {
+                var matchCount = fieldValue.match(/,/g).length;
+                document.getElementById(field).maxLength = fieldLength + matchCount;
+            }
+        }
+        //DEV-7319 Ends
+    
+    
+    </script>
+    
+    <apex:composition template="{!$Site.Template}">
+        <apex:define name="body">
+            <apex:form id="DigitalAuditFormId">
+                <apex:outputpanel >
+                    <apex:actionstatus id="status" onstart="showLoadingDiv();"
+                        onstop="hideLoadingDiv();">
+                        <apex:facet name="start">
+                            <div class="waitingSearchDiv" id="loading-curtain-div"
+                                style="display: none;">
+                                <div class="waitingHolder">
+                                    <img class="waitingImage" src="/img/loading32.gif"
+                                        title="Please Wait..." />
+                                    <span class="waitingDescription">Please
+                                        Wait...</span>
+                                </div>
+                            </div>
+                        </apex:facet>
+                    </apex:actionstatus>
+                </apex:outputpanel>
+                
+                <!-- Removing per DEV-13595
+                <div style="text-align:right;">
+                    <a id="helpme" style="cursor:pointer;" target="#">What Great Thing Happened To My Audit Page? (Hover To Display Help)</a>
+                    <br/>
+                    <br/>
+                </div> -->
+                
+                <div style="text-align:center;font-size: 25px; font-weight: bold ;">
+                    <apex:outputText value="Pre-Sale Support Request" /> 
+                </div>
+                
+                
+                <!-- do wee need it?
+                <apex:outputfield rendered="false" value="{!newLead.Website_Quote__c}" html-automationid="WebsiteQuoteOut"/>
+                <apex:outputfield rendered="false" value="{!newLead.Email_Count_Request__c}" html-automationid="EmailCountRequestOut"/> -->
+                <br/>
+                <br/>
+                <apex:PageMessages id="error" escape="false"/>
+                <apex:pageBlock mode="edit">
+                    <apex:pageBlockButtons location="top">
+                        <apex:commandButton value="Submit" action="{!saveRequest}" html-automationid="SubmitButton"/>
+                    </apex:pageBlockButtons>
+                    <apex:actionRegion rendered="{!editContactInfo}">
+                        <apex:outputPanel id="searchPanel" html-automationid="SearchPanel">
+                            <apex:pageBlockSection columns="1" collapsible="false" title="Sales Rep Information" html-automationid="SalesRepInfoSection" >
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel layout="block" style="width:250px;">Search Sales Rep with complete first or last name or email address</apex:outputPanel>
+                                    <apex:outputPanel >
+                                        <apex:inputText style="width:200px;height:17px" value="{!searchString}" id="txtSearchContact" styleclass="inputSearchText" html-automationid="TxtSearchContactInText"/>
+                                        <apex:commandButton action="{!searchContacts}" value="Search Sales Rep" id="btnSearch" reRender="searchPanel, salesRepSelect,notInList" styleClass="searchByMe" status="status" html-automationid="SearchSalesRepButton"/>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                                <apex:pageBlockSectionitem >
+                                    <apex:outputPanel layout="block" style="width:250px;"></apex:outputPanel>
+                                    <apex:outputPanel layout="block" style="color:red;font-weight:600;font-size: 1em;" id="errMessage">{!errorMessage}</apex:outputPanel>
+                                </apex:pageBlockSectionitem>
+                            </apex:pageBlockSection>
+                        </apex:outputPanel>
+                    </apex:actionRegion>
+                    <apex:outputPanel id="salesRepSelect" html-automationid="SalesRepPanel" rendered="{!editContactInfo}">
+                        <apex:actionRegion >
+                            <apex:actionFunction name="selectRep" action="{!getContact}" rerender="notInList, errMessage" oncomplete="maskPhone();"></apex:actionFunction>
+                            <apex:pageBlocksection columns="1" collapsible="false" >
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel layout="block" style="width:250px;">Select Sales Rep</apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="requiredInput">
+                                        <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                                        <apex:selectList id="RepList" style="min-width:300px" value="{!contactName}"  multiselect="false" size="1" required="true" tabIndex="1" onchange="selectRep();" html-automationid="ContactList">
+                                            <apex:selectOptions value="{!ContactNames}" html-automationid="ContactNamesOptions"/>
+                                        </apex:selectList>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                            </apex:pageBlockSection>
+                        </apex:actionRegion>
+                    </apex:outputPanel>
+                    <apex:outputPanel id="notInList" html-automationid="NoInListPanel">
+                        <apex:pageBlockSection columns="1" rendered="{!boolShowContacts}" title="Enter Sales Rep Info" html-automationid="SalesRepInfoSection">
+                            <apex:pageBlockSectionItem >
+                                <apex:outputPanel id="info" style="width:250px;"></apex:outputPanel>
+                                <apex:outputPanel style="font-weight:600;" >{!Message}</apex:outputPanel>
+                            </apex:pageBlockSectionItem>
+                            <apex:inputField value="{!newContact.LastName}" required="true" style="width:50%; font-size:1em;" html-automationid="newContactLastNameIn"/>
+                            <apex:inputField value="{!newContact.FirstName}" required="true" style="width:50%; font-size:1em;" html-automationid="newContactFirstNameIn"/>
+                            <apex:inputField value="{!newContact.Email}" required="true" style="width:50%; font-size:1em;" html-automationid="newContactEmailIn"/>
+                            <apex:inputField value="{!newContact.Phone}" required="true" styleClass="tel-mask" style="width:50%; font-size:1em;" html-automationid="NewContactPhoneIn"/>
+                            <apex:inputField value="{!newContact.Title}" style="width:50%; font-size:1em;" html-automationid="NewContactTitleIn"/>
+                            <apex:outputText value="{!saveContactId}" rendered="false" html-automationid="SaveContactOutText"/>
+                        </apex:pageBlockSection>
+                    </apex:outputPanel>
+                    <apex:outputPanel >
+                        <!--  THIS SECTION IS TO CONTROL THE ENTERING OF THE ADDITIONAL EMAIL NOTIFICATIONS -->
+                        <apex:actionRegion >
+                            <apex:actionFunction name="redrawAddlNotif" action="{!null}" rerender="AddlNotif"/>
+                            <apex:pageBlockSection title="Copy Request" columns="1" collapsible="false" html-automationid="CopyRequestSection">
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel layout="block" style="width:250px;" >Do you wish to copy any others on this submittal request?</apex:outputPanel>
+                                    <apex:selectList value="{!includeNotify}" multiselect="false" size="1" onchange="redrawAddlNotif();" html-automationid="IncludeNotifyList">
+                                        <apex:selectOptions value="{!yesNoOptions}" html-automationid="IncludeNotifyYesNoOptions"/>
+                                    </apex:selectList>
+                                </apex:pageBlockSectionItem>
+                            </apex:pageBlockSection>
+                        </apex:actionRegion>
+                        <apex:outputPanel id="AddlNotif" html-automationid="AddlNotIfPanel">
+                            <apex:pageBlockSection columns="1" rendered="{!includeNotify == 'true'}" html-automationid="AddlNotifySection">
+                                <apex:outputText value="Enter Email Addresses Only Please" style="font-size:1em;font-weight:bold;color:#1C92D0" html-automationid="EmailAddressOutText"/>
+                                <apex:outputText value=""/>
+                                <apex:inputText value="{!Notify1}" required="false" label="Email One:" style="width:100%; font-size:1em;" html-automationid="Notify1InText"/>
+                                <apex:inputText value="{!Notify2}" required="false" label="Email Two:" style="width:100%; font-size:1em;" html-automationid="Notify2InText"/>
+                                <apex:inputText value="{!Notify3}" required="false" label="Email Three:" style="width:100%; font-size:1em;" html-automationid="Notify3InText"/>
+                            </apex:pageBlockSection>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                    <apex:pageBlockSection title="Client Information" collapsible="false" columns="1" html-automationid="ClintInfoSection">
+                        <apex:pageBlockSection collapsible="false" columns="1">
+                            <apex:outputPanel layout="block" style="color:#1C92D0;font-weight:bold;" html-automationid="ClientNamePanel">&nbsp;
+                                
+                                <br/>Client Name &amp; Contact Information
+                            
+                            </apex:outputPanel>
+                            <apex:inputField value="{!oneCase.Company_Name__c}" style="width:300px;" label="Client Business Name" html-automationid="LeadCompanyIn" required="true" rendered="{!editClientInfo}"/>
+                            <apex:outputField value="{!oneCase.Company_Name__c}" style="width:300px;" label="Client Business Name" html-automationid="LeadCompanyOut" rendered="{!NOT(editClientInfo)}"/>
+                        
+                            
+                        </apex:pageBlockSection>
+                       
+                        <!-- DEV-7319 -->
+                        <apex:pageBlockSection collapsible="false" columns="1">
+                            <apex:inputField value="{!oneCase.Case_Primary_Industry__c}" style="width:300px;" required="true" label="Client&#39;s Business Industry" html-automationid="LeadPrimaryIndustryIn" rendered="{!editClientInfo}"/>
+                            <apex:outputField value="{!oneCase.Case_Primary_Industry__c}" style="width:300px;" label="Client's Business Industry" html-automationid="LeadPrimaryIndustryOut" rendered="{!NOT(editClientInfo)}"/>
+                            <apex:inputField value="{!oneCase.Case_Primary_Focus__c}" style="width:100px;" required="true" label="Client&#39;s Primary Focus" html-automationid="LeadPrimaryFocusIn" rendered="{!editClientInfo}"/>
+                            <apex:outputField value="{!oneCase.Case_Primary_Focus__c}" style="width:100px;" label="Client's Primary Focus" html-automationid="LeadPrimaryFocusOut" rendered="{!NOT(editClientInfo)}"/>
+                        </apex:pageBlockSection>
+                        <apex:actionRegion >
+                            <apex:actionFunction name="redrawClientUsingGOServices" action="{!null}" rerender="clientUsingGOServices" status="status"/>
+                            <apex:pageBlockSection collapsible="false" columns="1" rendered="{!NOT(emailOnly)}">
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel html-automationid="ClientUsingGODigitalServicesPanel">Is Client currently using G/O Digital services?</apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="requiredInput">
+                                        <apex:outputPanel layout="block" styleClass="requiredBlock" />
+                                        <apex:selectList value="{!isClientUsingGOServices}"
+                                    multiselect="false" size="1" onchange="redrawClientUsingGOServices(); " html-automationid="ClientUsingGoServicesList">
+                                            <apex:selectOptions value="{!yesNoOptions}" html-automationid="ClientUsingGoServicesYesNoOptions"/>
+                                        </apex:selectList>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                            </apex:pageBlockSection>
+                        </apex:actionRegion>
+                        <apex:outputPanel id="clientUsingGOServices" html-automationid="ClientUsingGOServiesPanel">
+                            <apex:pageBlockSection rendered="{!isClientUsingGOServices == 'true'}">
+                                <apex:inputField value="{!oneCase.DA_WhichProducts_ClientCurrentlyUsing__c}" style="width: 100%;" required="true" label="Which products are the Client currently using?" html-automationid="WebsiteRequestProductsClientUsingIn"/>
+                            </apex:pageBlockSection>
+                        </apex:outputPanel>
+                        <apex:outputField value="{!oneCase.Media_Partner__c}" label="Media Partner" style="width:300px;" html-automationid="DigMediaPartnerOut" rendered="{!NOT(editClientInfo)}"/>
+                    
+                    </apex:pageBlockSection>
+
+                    <!-- Media Partners -->
+                    <apex:pageBlockSection columns="1" title="Market Selection" html-automationid="MarketSelectionSection" rendered="{!editClientInfo}">
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel html-automationid="SelectMediaPartnerLabel">Select Media Partner:
+                            
+                            </apex:outputlabel>
+                            <apex:outputPanel layout="block" styleClass="requiredInput">
+                                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                                <apex:selectList value="{!RelatedCompany}" multiselect="false" size="1" style="width:300px;" required="true" tabindex="3" html-automationid="RelatedCompany">
+                                    <apex:selectOptions value="{!itemsm}" id="moptions" html-automationid="RelatedCompanyItemsOptions"/>
+                                </apex:selectList>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+                    <!--
+                    <apex:outputPanel ><apex:outputLabel value="Select Media Partner" style="color:#1C92D0; font-weight:bold;"/><apex:outputPanel layout="block"><apex:selectList id="mediaPartners" value="{!selectedMediaPartners}" multiselect="true" size="10" required="false"  style="width:200px;"><apex:selectOptions value="{!mediaPartnerOptions}"/></apex:selectList><apex:panelGrid columns="2"><apex:outputpanel ><apex:outputLabel value="Available"  styleClass="boldLabel"/>&nbsp;<i>(Click Item to Add)</i></apex:outputpanel><apex:outputpanel ><apex:outputLabel value="Chosen"  styleClass="boldLabel"/>&nbsp;<i>(Click Item to Remove)</i></apex:outputpanel><apex:outputPanel id="availableMediaPartners" /><apex:outputPanel id="selectedMediaPartners" /></apex:panelGrid></apex:outputPanel></apex:outputPanel>
+                -->
+                    <!--/td></tr></table-->
+                    <apex:outputPanel id="subSections" html-automationid="SubSectionsPanel">
+                        <!-- Digital Audit -->
+                        <apex:actionRegion >
+                            <apex:actionFunction name="redrawDigAudit" action="{!validateFields}" rerender="digAudit,error" oncomplete="maskPhone();" />
+                            <apex:actionFunction name="redrawEmailCount" action="{!null}" rerender="emailCount"/>
+                            <apex:actionFunction name="redrawWebsiteQuote" action="{!resetWebsite}" rerender="designType,pageType,websiteQuote,websiteQuoteAtt"/>
+                            <apex:pageBlockSection title="Type of Support Needed" collapsible="false" columns="2" html-automationid="AuditSelectionsSection">
+                                <apex:pageBlockSectionItem rendered="{!NOT(emailOnly)}">
+                                    <apex:outputPanel html-automationid="DigitalAuditNeededPanel" >Digital Support</apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="requiredInput">
+                                        <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                                        <apex:selectList value="{!includeDigitalAudit}" multiselect="false" size="1" onchange="redrawDigAudit();" html-automationid="IncludeDigitalAuditList">
+                                            <apex:selectOptions value="{!yesNoOptions}" html-automationid="IncludeDigitalAuditYesNoOptions"/>
+                                        </apex:selectList>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel html-automationid="EmailBlastNeededPanel">Email Count</apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="requiredInput">
+                                        <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                                        <apex:selectList value="{!includeEmailCount}" multiselect="false" size="1" onchange="redrawEmailCount();" html-automationid="IncludeEmailCountList" disabled="{!emailOnly}">
+                                            <apex:selectOptions value="{!yesNoOptionsEmail}" html-automationid="IncludeEmailCountYesNoOptions"/>
+                                        </apex:selectList>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                                <apex:pageBlockSectionItem rendered="{!NOT(emailOnly)}">
+                                    <apex:outputPanel html-automationid="CustomWebsiteQuoteNeededPanel">Website Quote</apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="requiredInput">
+                                        <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                                        <apex:selectList value="{!includeWebsiteQuote}" multiselect="false" size="1" onchange="redrawWebsiteQuote();" html-automationid="IncludeWebsiteQuoteList">
+                                            <apex:selectOptions value="{!yesNoOptions}" html-automationid="IncludeWebsiteQuoteYesNoOptions"/>
+                                        </apex:selectList>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                                <br/>
+                                <!--<apex:outputText >"*Sales Call Request - For Sales Opportunities $2000 Per Month And Above Only Please"</apex:outputText>-->
+                            </apex:pageBlockSection>
+                        </apex:actionRegion>
+                        <apex:outputPanel id="digAudit" html-automationid="DigAuditPanel">
+                            <apex:pageBlockSection title="Additional Client Information" columns="1" rendered="{!includeDigitalAudit == 'true'}" collapsible="false" html-automationid="AddClientSection">
+                                <apex:pageBlockSection collapsible="false" columns="1">
+                                    <apex:pageBlockSection >
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel value="Type of Support" html-automationid="TypeOfAudit">
+                                                <img src="/img/alohaSkin/help_orange.png" title="{!typeOfAuditHelpText}" />
+                                            </apex:outputLabel>
+                                            <apex:actionRegion >
+                                                <apex:actionFunction name="redrawClient2" action="{!validateFields}" 
+                                                    rerender="eCommerceOnly, ClientAddressSection, addtnlClntInfoSubSection, clientURLSection, DigAuditInfoSection, digAudit, error"/>
+                                                <apex:inputField value="{!digaudRequest.Type_of_Audit__c}" style="width:300px;" label="Type of Support" 
+                                                            html-automationid="WebsiteTypeOfAuditIn" onchange="redrawClient2();" required="true">
+                                                </apex:inputField>
+                                            </apex:actionRegion>
+                                        </apex:pageBlockSectionItem>
+                                    </apex:pageBlockSection>
+                                    <apex:pageBlockSection Id="eCommerceOnly">
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel value="Is this business e-commerce only?" html-automationid="BusinessECommerceLabel" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}"/>
+                                            <apex:actionRegion >
+                                                 <apex:actionFunction name="redrawClient" action="{!validateFields}" 
+                                                    rerender="ClientAddressSection, Comp1AddressSection, Comp2AddressSection, clientURLSection, comp1URLSection, comp2URLSection,error"/>
+                                                <apex:inputField value="{!digaudRequest.DA_IsThisBusiness_EcommerceOnly__c}" required="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}" style="width:100px;" label="Is this business e-commerce only?" 
+                                                            html-automationid="WebsiteRequestBusinessEcommerceOnlyIn" onchange="redrawClient();" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                                    <!--<apex:actionSupport event="onchange" rerender="ClientAddressSection, Comp1AddressSection, Comp2AddressSection, clientURLSection, comp1URLSection,   comp2URLSection,error" status="status" />-->
+                                                </apex:inputField>
+                                            </apex:actionRegion>
+                                        </apex:pageBlockSectionItem>
+                                    </apex:pageBlockSection>
+                                    <apex:pageBlockSection collapsible="false" columns="1" Id="ClientAddressSection" html-automationid="ClientAddressSection">
+                                        <apex:inputField value="{!digaudRequest.DA_Client_Address__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', OR(digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes', digaudRequest.Type_of_Audit__c = 'Digital Snapshot'))}" label="Client Address" html-automationid="WebsiteRequestClientAddressIn" rendered="{!editDsClientInfo}"/>
+                                        <apex:outputField value="{!digaudRequest.DA_Client_Address__c}" style="width:300px;" label="Client Address" html-automationid="WebsiteRequestClientAddressOut" rendered="{!NOT(editDsClientInfo)}"/>
+                                        <apex:inputField value="{!digaudRequest.DA_Client_City__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', OR(digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes', digaudRequest.Type_of_Audit__c = 'Digital Snapshot'))}" label="Client City" html-automationid="WebsiteRequestClientCityIn" rendered="{!editDsClientInfo}"/>
+                                        <apex:outputField value="{!digaudRequest.DA_Client_City__c}" style="width:300px;" label="Client City" html-automationid="WebsiteRequestClientCityOut" rendered="{!NOT(editDsClientInfo)}"/>
+                                        <apex:inputField value="{!digaudRequest.DA_Client_State__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', OR(digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes', digaudRequest.Type_of_Audit__c = 'Digital Snapshot'))}" label="Client State" html-automationid="WebsiteRequestClientStateIn" rendered="{!editDsClientInfo}"/>
+                                        <apex:outputField value="{!digaudRequest.DA_Client_State__c}" style="width:300px;" label="Client State" html-automationid="WebsiteRequestClientStateOut" rendered="{!NOT(editDsClientInfo)}"/>
+                                        <apex:inputField value="{!digaudRequest.DA_Client_Postal_Code__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', OR(digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes', digaudRequest.Type_of_Audit__c = 'Digital Snapshot'))}" label="Client Postal Code"
+                                            id="DAClientPostalCodeId" onkeydown="inputCharLimit('{!$Component.DAClientPostalCodeId}', 6);" onkeypress="return inputLimiter(event,'Numbers')" html-automationid="WebsiteRequestClientPostalCodeIn" rendered="{!editDsClientInfo}"/>
+                                        <apex:outputField value="{!digaudRequest.DA_Client_Postal_Code__c}" style="width:300px;" html-automationid="WebsiteRequestClientPostalCodeOut" rendered="{!NOT(editDsClientInfo)}"/>
+                                    </apex:pageBlockSection>   
+                                    <apex:pageBlockSection columns="1" ID="addtnlClntInfoSubSection" html-automationid="addtnlClntInfoSubSection">
+                                        <apex:inputField value="{!digaudRequest.Contact_Name__c}" label="Client Contact Name" style="width:300px;" html-automationid="LeadLastNameIn" required="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}" rendered="{!AND(digaudRequest.Type_of_Audit__c != 'Digital Snapshot', editDsClientInfo)}"/>
+                                        <apex:outputField value="{!digaudRequest.Contact_Name__c}" label="Client Contact Name" style="width:300px;" html-automationid="LeadLastNameOut" rendered="{!AND(digaudRequest.Type_of_Audit__c != 'Digital Snapshot', NOT(editDsClientInfo))}"/>
+                                        <apex:inputField value="{!digaudRequest.Contact_Phone__c}" label="Client Contact Phone Number" style="width:300px;" styleClass="tel-mask" required="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}"  html-automationid="LeadPhoneIn" rendered="{!AND(digaudRequest.Type_of_Audit__c != 'Digital Snapshot', editDsClientInfo)}"/>
+                                        <apex:outputField value="{!digaudRequest.Contact_Phone__c}" label="Client Contact Phone Number" style="width:300px;" html-automationid="LeadPhoneOut" rendered="{!AND(digaudRequest.Type_of_Audit__c != 'Digital Snapshot', NOT(editDsClientInfo))}"/>
+                                        <apex:inputField value="{!digaudRequest.DA_Client_Phone_Number__c}" style="width:300px;" styleClass="tel-mask" required="true" html-automationid="WebsiteRequestClientPhoneNumberIn"    rendered="{!editDsClientInfo}"/>
+                                        <apex:outputField value="{!digaudRequest.DA_Client_Phone_Number__c}" style="width:300px;" html-automationid="WebsiteRequestClientPhoneNumberOut" rendered="{!NOT(editDsClientInfo)}"/>
+                                        <apex:inputField value="{!digaudRequest.DA_Website__c}" label="Client URL (www.website.com)" style="width:300px;" required="true" html-automationid="LeadWebsiteIn" rendered="{!editDsClientInfo}"/>
+                                        <apex:outputField value="{!digaudRequest.DA_Website__c}" label="Client URL (www.website.com)" style="width:300px;"  html-automationid="LeadWebsiteOut" rendered="{!NOT(editDsClientInfo)}"/>
+                                    </apex:pageBlockSection>   
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection collapsible="false" columns="1" id="clientURLSection" html-automationid="ClientUrlSection">
+                                    <apex:pageBlockSection columns="1">
+                                        <apex:inputField value="{!digaudRequest.DA_Client_Facebook_URL__c}" style="width:300px;" required="{!isRequired}" label="Client&#39;s     Facebook URL" html-automationid="WebsiteRequestClientFacebookURLIn"/><!-- DEV-8644 -->
+                                        <apex:inputField value="{!digaudRequest.DA_Client_Twitter_URL__c}" style="width:300px;" required="{!isRequired}" label="Client&#39;s  Twitter URL" html-automationid="WebsiteClientTwitterURLIn"/><!-- DEV-8644 -->
+                                        <apex:inputField value="{!digaudRequest.Number_of_Locations__c}" required="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}" html-automationid="WebsiteRequestNumOfLocationsIn" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}"/>
+                                    </apex:pageBlockSection> 
+                                </apex:pageBlockSection>
+                            </apex:pageBlockSection>
+                            <apex:pageBlockSection title="Digital Support Information" columns="1" rendered="{!includeDigitalAudit == 'true'}" collapsible="false" id="DigAuditInfoSection" html-automationid="DigAuditInfoSection">
+                                <apex:pageBlockSection columns="1" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:inputField value="{!digaudRequest.Client_Reporting_Available__c}" rendered="{!digaudRequest.Type_of_Audit__c =='Full Digital Proposal (Industry Info, Digital Footprint, Budgets and Expectations)'}"></apex:inputField>
+                                    <apex:inputField value="{!digaudRequest.DA_List_Products_Services__c}" label="What Products/Services do they want to focus on promoting?" style="width: 100%;" required="true" html-automationid="LeadListProdServicesIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_Select_New_Products__c}" label="Are there any specific products that you NEED to have?  If not, please leave blank and your Jumpstart Specialist will evaluate the best needs for your client." required="false" html-automationid="LeadSelectNewProductsIn"/>
+                                    <!-- DEV-9783
+                                    <apex:pageblockSectionItem >
+                                        <apex:outputLabel value="Are there any specific products that you NEED to have?  If not, please leave blank and your Jumpstart Specialist will evaluate the best needs for your client." />
+                                        <apex:actionRegion >
+                                            <apex:inputField value="{!newLead.Select_New_Products__c}" html-automationid="NewProductsIn">
+                                                <apex:actionSupport event="onchange" reRender="PPCBudgetEstimation" action="{!checkPPCEstimator}" />
+                                            </apex:inputField>
+                                        </apex:actionRegion>
+                                    </apex:pageblockSectionItem> -->
+                                    <apex:inputField value="{!digaudRequest.DA_Budget_Range__c}" label="Monthly Digital Budget Range" style="width: 50%;"  required="true" html-automationid="LeadBudgetRangeIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_Client_Maximum_Budget__c}" required="false" label="If the Client has a MAXIMUM monthly budget they can afford, please enter here." html-automationid="WebsiteRequestClientMaxBudgetIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_Avg_Cust_Value__c}" label="What is the average customer value?" required="true" html-automationid="LeadAvgCustValIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_Current_Adv__c}" label="What is their current advertising?" required="true" html-automationid="LeadCurrAdvIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_What_is_the_Client_goal_1__c}" label="Goals: 1."  required="true" style="width: 50%;" html-automationid="WebsiteRequestClientGoal1In"/>
+                                    <apex:inputField value="{!digaudRequest.DA_What_is_the_Client_goal_2__c}" label="       2." style="width: 50%;" html-automationid="WebsiteRequestClientGoal2In"/>
+                                    <apex:inputField value="{!digaudRequest.DA_What_is_the_Client_goal_3__c}" label="       3." style="width: 50%;" html-automationid="WebsiteRequestClientGoal3In"/>
+                                    <apex:inputField value="{!digaudRequest.DA_How_does_the_Client_measure_success__c}" required="true" html-automationid="WebsiteRequestClientMeasureSuccessIn"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" id="DATargetGeoType" html-automationid="TargetGeoTypeSection" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:pageBlockSectionItem >
+                                        <apex:outputLabel value="Target Geo Type" html-automationid="TargetGeoTypeLabel"/>
+                                        <apex:actionRegion >
+                                            <apex:inputField value="{!digaudRequest.DA_Target_Geo_Type__c}" required="true" label="Target Geo Type" html-automationid="WebsiteRequestTargetGeoTypeIn">
+                                                <apex:actionSupport event="onchange" rerender="DATargetGeoType" status="status" />
+                                            </apex:inputField>
+                                        </apex:actionRegion>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:inputField value="{!digaudRequest.Target_Radius_miles__c}" 
+                                    required="{!digaudRequest.DA_Target_Geo_Type__c == 'Radius'}"
+                                    rendered="{!digaudRequest.DA_Target_Geo_Type__c == 'Radius'}" html-automationid="WebsiteRequestTargetRadiuMilesIn">
+                                        <apex:outputPanel layout="block" style="color:#1C92D0;font-weight:bold;" html-automationid="DaMaxRadius200Panel">
+                                            Max radius is 200 miles.
+                                        </apex:outputPanel>
+                                    </apex:inputField>
+                                    <!-- DEV-8544 Starts -->
+                                    <apex:inputField value="{!digaudRequest.DA_Radius_Zip_Code__c}" style="width:300px;"
+                                                     onkeypress="return inputLimiter(event,'NumbersWithComma');"
+                                                     rendered="{!digaudRequest.DA_Target_Geo_Type__c == 'Radius'}" html-automationid="WebsiteRadiusZipCodeIn">
+                                    <!-- DEV-9097 -->
+                                    <apex:outputPanel layout="block" style="color:#1C92D0;font-weight:bold;" html-automationid="DaUseCommaSeparatorPanel">
+                                       Use Comma (,) separator to enter multiple Zip Code 
+                                    </apex:outputPanel>
+                                    </apex:inputField>
+                                    <!-- DEV-9097 Ends -->
+                                    <!-- DEV-8544 Ends -->
+                                    <apex:inputField value="{!digaudRequest.DA_Target_County_Counties__c}" style="width:300px;"
+                                    required="{!digaudRequest.DA_Target_Geo_Type__c == 'County'}"
+                                    rendered="{!digaudRequest.DA_Target_Geo_Type__c == 'County'}" html-automationid="WebsiteRequestTargetCountyCountiesIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_Target_DMA__c}" style="width:300px;"
+                                    required="{!digaudRequest.DA_Target_Geo_Type__c == 'DMA'}"
+                                    rendered="{!digaudRequest.DA_Target_Geo_Type__c == 'DMA'}" html-automationid="WebsiteRequestDaTargetDMAIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_Target_State__c}" 
+                                    required="{!digaudRequest.DA_Target_Geo_Type__c == 'State'}"
+                                    rendered="{!digaudRequest.DA_Target_Geo_Type__c == 'State'}" html-automationid="WebsiteRequestDaTargetStateIn"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" html-automationid="GeneralNotesSection" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:inputField value="{!digaudRequest.DA_General_Notes__c}" label="Any other comments or notes that will help us make the best recommendation for your Client" style="width: 75%;" html-automationid="LeadGeneralNotesIn"/>
+                                </apex:pageBlockSection>
+                                <!-- DEV-9783
+                                <apex:outputPanel id="PPCBudgetEstimation" >
+                                    <apex:pageBlockSection />
+                                    <apex:pageBlockSection title="PPC Budget Estimator" collapsible="false" rendered="{!isPPC}" columns="1" html-automationid="PpcBudgetEstimatorSection">
+                                        <apex:inputField value="{!WebsiteRequest.Keywords__c}" style="width:100%; font-size:1em;" html-automationid="WebsiteRequestKeywordsIn"/>
+                                        <apex:inputField value="{!WebsiteRequest.Negative_Keywords__c}" style="width:100%; font-size:1em;" html-automationid="WebsiteRequestNegativeKeywordsIn"/>
+                                        <apex:inputField value="{!WebsiteRequest.Estimated_Average_CPC__c}" style="width:300px;font-size:1em;" html-automationid="WebsiteRequestEstimatedAverageCpcIn"/>
+                                        <apex:inputField value="{!WebsiteRequest.Expected_Clicks__c}" style="width:300px;font-size:1em;" html-automationid="WebsiteRequestExpectedClicksIn"/>
+                                        <apex:inputField value="{!WebsiteRequest.Expected_CPC__c}" style="width:300px;font-size:1em;" html-automationid="WebsiteRequestExpectedCpcIn"/>
+                                        <apex:inputField value="{!WebsiteRequest.Expected_Lead_Volume__c}" style="width:300px;font-size:1em;" html-automationid="WebsiteRequestExpectedLeadVolumeIn"/>
+                                        <apex:inputField value="{!WebsiteRequest.Media_Budget__c}" style="width:300px;font-size:1em;" html-automationid="WebsiteRequestMediaBudgetIn"/>
+                                    </apex:pageBlockSection>
+                                </apex:outputPanel> -->
+                                <apex:pageBlockSection columns="1" id="CampaignReportingUpload"
+                            title="Attachment" collapsible="false" html-automationid="CampaignReportingUploadSection">
+                                    <apex:pageBlockSectionItem >
+                                        <apex:outputPanel layout="block" style="width:200px;" html-automationid="MaxAttachmentPanel"></apex:outputPanel>
+                                        <apex:outputLabel value="Max attachment size is 4Mb" html-automationid="MaxAttachmentLabel"/>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem id="CampaignReportingUploadSection1" html-automationid="CampaignReportingUploadSection1">
+                                        <apex:outputLabel value="" />
+                                        <apex:outputPanel >
+                                            <apex:inputFile id="CampaignReportingFileUpload"
+                                        fileName="{!CampaignReportingUploadAttachment.AttachmentName}"
+                                        contentType="{!CampaignReportingUploadAttachment.AttachmentContentType}"
+                                        value="{!CampaignReportingUploadAttachment.AttachmentBody}"
+                                        onchange="uploadFile('{!$Component.CampaignReportingFileUpload}',  '{!$Component.CampaignReportingUpload.CampaignReportingUploadSection2.CampaignReportingattachmentName}', '{!$Component.CampaignReportingUpload.CampaignReportingUploadSection2.CampaignReportingattachmentBody}', '{!$Component.CampaignReportingUpload.CampaignReportingUploadSection2.CampaignReportingattachmentContentType}');"></apex:inputFile>
+                                        </apex:outputPanel>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem id="CampaignReportingUploadSection2" html-automationid="CampaignReportingUploadSection2">
+                                        <apex:outputLabel value=""></apex:outputLabel>
+                                        <apex:outputPanel >
+                                            <apex:actionRegion >
+                                                <apex:commandButton action="{!CampaignReportingUploadAttachment.uploadAttachment}"
+                                            value="Upload Attachment"
+                                            reRender="CampaignReportingAttachmentId, displayCampaignReportingFileAttachmentLink, CampaignReportingattachmentBody,CampaignReportingAttachmentName,CampaignReportingAttachmentContentType"
+                                            status="status" html-automationid="UploadAttachmentButton"/>
+                                                <apex:inputHidden value="{!CampaignReportingUploadAttachment.AttachmentBody}"
+                                            html-clearfileattachment="true"
+                                            id="CampaignReportingattachmentBody" html-automationid="CampaignReportingAttachmentBodyInputHidden"/>
+                                                <apex:inputHidden value="{!CampaignReportingUploadAttachment.AttachmentName}"
+                                            id="CampaignReportingAttachmentName" html-automationid="CampaignReportingAttachmentNameInputHidden"/>
+                                                <apex:inputHidden value="{!CampaignReportingUploadAttachment.AttachmentContentType}"
+                                            id="CampaignReportingAttachmentContentType" html-automationid="CampaignReportingAttachmentContentTypeInputHidden"/>
+                                                <apex:inputHidden value="{!CampaignReportingUploadAttachment.AttachmentId}"
+                                            id="CampaignReportingAttachmentId" html-automationid="CamapaignReportingUploadAttachmentInputHidden"/>
+                                                <apex:outputLink Id="displayCampaignReportingFileAttachmentLink"
+                                            value="/servlet/servlet.FileDownload?file={!CampaignReportingUploadAttachment.AttachmentId}"
+                                            target="_blank" html-automationid="DisplayCampaignReportingFileAttachmentLink">{!IF(CampaignReportingUploadAttachment.AttachmentId == NULL, '' ,CampaignReportingUploadAttachment.AttachmentName)}</apex:outputLink>
+                                            </apex:actionRegion>
+                                        </apex:outputPanel>
+                                    </apex:pageBlockSectionItem>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection title="Competitor #1 Information" collapsible="false" columns="1" html-automationid="Competitor1InfoSection" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:outputPanel layout="block" style="color:#1C92D0;font-weight:bold;" html-automationid="ClientsCompetitiveLandscapeOnlinePanel">&nbsp;
+                                        
+                                        <br/>The following information is required to provide an analysis of the Client&#39;s competitive landscape online. Select a competitor with a strong digital presence for an accurate analysis
+                                    
+                                    </apex:outputPanel>
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor1_Business_Name__c}"  style="width:300px;" required="{!digaudRequest.Type_of_Audit__c != 'Budgets and Expectations'}" label="Competitor #1 Business Name" html-automationid="WebsiteCompetitor1BusinessNameIn"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" collapsible="false" Id="Comp1AddressSection" html-automationid="Comp1AddressSection" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor1_Address__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes')}" html-automationid="WebsiteRequestCompetitor1AddressIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor1_City__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes')}" html-automationid="WebsiteRequestCompetitor1CityIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor1_State__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes')}" html-automationid="WebsiteRequestCompetitor1State"/>
+                                    <!-- DEV-7048 Starts -->
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor1_Zip_Code__c}" style="width:300px;" onkeypress="return inputLimiter(event,'Numbers')" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes')}" html-automationid="WebsiteRequestCompetitor1ZipCodeIn"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" collapsible="false" html-automationid="Comp1UrlSection" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor1_Phone_Number__c}" style="width:300px;" styleClass="tel-mask" required="{!digaudRequest.Type_of_Audit__c != 'Budgets and Expectations'}" html-automationid="WebsiteRequestComptitor1PhoneNumberIn"/>
+                                    <!-- DEV-7048 Ends -->
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor1_URL__c}" style="width:300px;" required="{!digaudRequest.Type_of_Audit__c != 'Budgets and Expectations'}" html-automationid="WebsiteRequestCompetitor1UrlIn"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" collapsible="false" id="comp1URLSection" html-automationid="Comp1UrlSection2" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor1_Facebook_URL__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'No')}" html-automationid="WebsiteRequestCompetitor1FacebookUrlIn"/><!-- DEV-8644 -->
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor1_Twitter_URL__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'No')}" html-automationid="WebsiteRequestCompetitor1TwitterUrlIn"/><!-- DEV-8644 -->
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection title="Competitor #2 Information" collapsible="false" columns="1" html-automationid="Competitor2InfoSection" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor2_Business_Name__c}" style="width:300px;" required="{!digaudRequest.Type_of_Audit__c != 'Budgets and Expectations'}" html-automationid="WebsiteRequestCompetitor2BusinessnameIn"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" collapsible="false" Id="Comp2AddressSection" html-automationid="Comp2AddressSection" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor2_Address__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes')}" html-automationid="WebsiteRequestCompetitor2AddressIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor2_City__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes')}" html-automationid="WebsiteRequestCompetitor2CityIn"/>
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor2_State__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes')}" html-automationid="WebsiteRequestCompetitor2StateIn"/>
+                                    <!-- DEV-7048 Starts -->
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor2_Zip_Code__c}" style="width:300px;" onkeypress="return inputLimiter(event,'Numbers')" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'Yes')}" html-automationid="WebsiteRequestCompetitor2StateIn"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" collapsible="false" html-automationid="Comp2UrlSection" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor2_Phone_Number__c}" style="width:300px;" styleClass="tel-mask" required="{!digaudRequest.Type_of_Audit__c != 'Budgets and Expectations'}" html-automationid="WebsiteRequestCompetitor2PhoneNumberIn"/>
+                                    <!-- DEV-7048 Ends -->
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor2_URL__c}" style="width:300px;" required="{!digaudRequest.Type_of_Audit__c != 'Budgets and Expectations'}" html-automationid="WebsiteRequestCompetitor2UrlIn"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" collapsible="false" id="comp2URLSection" html-automationid="Comp2UrlSection2" rendered="{!digaudRequest.Type_of_Audit__c != 'Digital Snapshot'}">
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor2_Facebook_URL__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'No')}" html-automationid="WebsiteRequestCompetitor2FacebookUrlIn"/><!-- DEV-8644 -->
+                                    <apex:inputField value="{!digaudRequest.DA_Competitor2_Twitter_URL__c}" style="width:300px;" required="{!AND(digaudRequest.Type_of_Audit__c != 'Budgets and Expectations', digaudRequest.DA_IsThisBusiness_EcommerceOnly__c != 'No')}" html-automationid="WebsiteRequestCompetitor2TwitterUrlIn"/><!-- DEV-8644 -->
+                                </apex:pageBlockSection>
+                            </apex:pageBlockSection>
+                        </apex:outputPanel>
+                        <apex:outputPanel id="emailCount" html-automationid="EmailCountPanel">
+                            <apex:pageBlockSection title="Email Blast Request Information" columns="2" rendered="{!includeEmailCount == 'true'}" collapsible="false" html-automationid="EmailBlastInfoSection">
+                                <apex:inputField value="{!ECountRequest.EC_Target_Demographic__c}" label="What are the demographic targets? A comma between filters ensures we will combine those filters within one count. Individually numbered selects ensures we will break out those counts." style="width: 100%;" required="true" html-automationid="LeadTargetDemographicIn"/>
+                                <apex:outputText rendered="{!NOT(emailOnly)}" style="color:#1C92D0;" value="Choose A Link Based On Your Business Team To View Demographic Options" html-automationid="DemographicOptionsOutText"/>
+                                <apex:outputText rendered="{!NOT(emailOnly)}">""</apex:outputText>
+                                <apex:outputLink rendered="{!NOT(emailOnly)}" value="https://wiki.godigitalmarketing.com/display/DSKS/Direct+Email+Database+Catalog" target="_blank" id="wikiLinkGOBC"  html-automationid="WikiLinkGobcLink">Direct Wiki</apex:outputLink>
+                                <apex:outputText rendered="{!NOT(emailOnly)}">""</apex:outputText>
+                                <apex:outputLink rendered="{!NOT(emailOnly)}" value="https://wiki.godigitalmarketing.com/display/GLBC/Tegna+Media+Email+Database+Catalog" target="_blank" id="wikiLinkGOCP" html-automationid="WikiLinkGocpLink">TEGNA Media Wiki</apex:outputLink>
+                                <apex:outputText rendered="{!NOT(emailOnly)}" >""</apex:outputText>
+                                <apex:outputLink rendered="{!NOT(emailOnly)}" value="https://wiki.godigitalmarketing.com/display/GLUSCP/Gannett+Email+Database+Catalog" target="_blank" id="wikiLinkGODR" html-automationid="WikiLinkGodrLink">Gannett Wiki</apex:outputLink>
+                                <apex:outputText ></apex:outputText>
+                            </apex:pageBlockSection>
+                            <apex:pageBlockSection columns="1" rendered="{!includeEmailCount == 'true'}" collapsible="false" html-automationid="EmailCountSection">
+                                <apex:inputField value="{!ECountRequest.EC_Email_Quantity__c}" label="What is the quantity being requested? **10000 Minimum" style="width: 50%;" required="true" html-automationid="LeadEmailQuantityIn"/>
+                                <apex:inputField value="{!ECountRequest.EC_Email_Budget__c}"  label="What is the budget for the campaign?" style="width: 50%;" required="true" html-automationid="LeadEmailBudgetIn"/>
+                                <apex:inputField value="{!ECountRequest.EC_General_Notes__c}" label="Describe your email blast campaign goals, and any additional notes" style="width: 100%;" required="true" html-automationid="LeadEmailCountRequestNotesIn"/>
+                            </apex:pageBlockSection>
+                            <apex:pageBlockSection columns="1" id="ECTargetGeoType" rendered="{!includeEmailCount == 'true'}" collapsible="false" html-automationid="EcTargetGeoTypeSection">
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputpanel >
+                                        <apex:outputLabel value="Target Geo Type" html-automationid="TargetGeoTypeLabel"/>
+                                        <img src="/img/alohaSkin/help_orange.png" title="We are UNABLE to pull counts by city." /><!-- DEV-8544 -->
+                                    </apex:outputpanel>
+                                    <apex:actionRegion >
+                                        <apex:inputField value="{!ECountRequest.EC_Target_Geo_Type__c}" required="true" label="Target Geo Type" html-automationid="WebsiteRequestTargetGeoTypeIn">
+                                            <apex:actionSupport event="onchange" rerender="ECTargetGeoType" status="status" />
+                                        </apex:inputField>
+                                    </apex:actionRegion>
+                                </apex:pageBlockSectionItem>
+                                <!-- DEV-8544 Starts -->
+                                <apex:inputField value="{!ECountRequest.EC_Target_County__c}" style="width:300px;"
+                                                 rendered="{!ECountRequest.EC_Target_Geo_Type__c == 'County'}" 
+                                                 required="{!ECountRequest.EC_Target_Geo_Type__c == 'County'}"
+                                                 html-automationid="WebsiteRequestTargetCountryIn"/>
+                                <!-- DEV-8544 Ends -->
+                                <apex:inputField value="{!ECountRequest.Target_Radius_miles__c}" 
+                                required="{!ECountRequest.EC_Target_Geo_Type__c == 'Radius'}"
+                                rendered="{!ECountRequest.EC_Target_Geo_Type__c == 'Radius'}"
+                                label="Target Radius (miles)"
+                                html-automationid="WebsiteRequestTotalDurationIn">
+                                    <apex:outputPanel layout="block" style="color:#1C92D0;font-weight:bold;" html-automationid="EcMaxRadius200Panel">
+                                       Max radius is 200 miles.
+                                    </apex:outputPanel>
+                                </apex:inputField>
+                                <!-- DEV-8544 Starts -->
+                                <apex:inputField value="{!ECountRequest.EC_Radius_Zip_Code__c}" style="width:300px;"
+                                                 onkeypress="return inputLimiter(event,'NumbersWithComma');"
+                                                 rendered="{!ECountRequest.EC_Target_Geo_Type__c == 'Radius'}" 
+                                                 required="{!ECountRequest.EC_Target_Geo_Type__c == 'Radius'}"
+                                                 html-automationid="WebsiteRequestRadiusZipCodeIn">
+                                <!-- DEV-9097 -->
+                                <apex:outputPanel layout="block" style="color:#1C92D0;font-weight:bold;" html-automationid="EcRadiusUseCommaSeparatorPanel">
+                                       Use Comma (,) separator to enter multiple Zip Code
+                                </apex:outputPanel>
+                                </apex:inputField>
+                                <!-- DEV-9097 Ends -->
+                                <!-- DEV-8544 Ends -->
+                                <apex:inputField value="{!ECountRequest.EC_Zip_Code__c}" style="width:300px;"
+                                         required="{!ECountRequest.EC_Target_Geo_Type__c == 'Zip Code'}"
+                                         onkeypress="return inputLimiter(event,'NumbersWithComma');"
+                                         rendered="{!ECountRequest.EC_Target_Geo_Type__c == 'Zip Code'}" html-automationid="WebsiteRequestZipCodeIn">
+                                <!-- DEV-9097 -->
+                                <apex:outputPanel layout="block" style="color:#1C92D0;font-weight:bold;" html-automationid="EcZipCodeUseCommaSeparatorPanel">
+                                       Use Comma (,) separator to enter multiple Zip Code
+                                </apex:outputPanel>
+                                </apex:inputField>
+                                <!-- DEV-9097 Ends -->
+                                <apex:inputField value="{!ECountRequest.EC_Target_DMA__c}" style="width:300px;"
+                                required="{!ECountRequest.EC_Target_Geo_Type__c == 'DMA'}"
+                                rendered="{!ECountRequest.EC_Target_Geo_Type__c == 'DMA'}" html-automationid="WebsiteRequestEcTargetDmaIn"/>
+                                <!-- DEV-7521 -->
+                                <apex:inputField value="{!ECountRequest.EC_Target_State__c}" 
+                                required="{!ECountRequest.EC_Target_Geo_Type__c == 'State'}"
+                                rendered="{!ECountRequest.EC_Target_Geo_Type__c == 'State'}" html-automationid="WebsiteRequestEcTargetStateIn"/>
+                            </apex:pageBlockSection>
+                        </apex:outputPanel>
+                        <!-- Lead Capture Page Or Website -->
+                        <apex:outputPanel id="designType" html-automationid="DesignTypePanel">
+                            <apex:actionRegion >
+                                <apex:actionFunction name="redrawPageType" action="{!resetWebsiteOptions}" rerender="pageType,websiteQuote"/>
+                                <apex:pageBlockSection title="Website Quote Information" collapsible="false" columns="1" rendered="{!includeWebsiteQuote == 'true'}" html-automationid="WebsiteQuoteInfoSection">
+                                    <apex:pageBlockSectionItem >
+                                        <apex:outputPanel layout="block" style="width:300px;" html-automationid="LeadCaptureOrFullWebsitePanel">Do you Need a Lead Capture Page or Website?</apex:outputPanel>
+                                        <apex:outputPanel layout="block" styleClass="requiredInput">
+                                            <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                                            <apex:selectList value="{!includeWebsiteType}" multiselect="false" required="true" size="1" onchange="redrawPageType();" html-automationid="IncludeWebsiteTypeList">
+                                                <apex:selectOptions value="{!pageTypeOptions}" html-automationid="PageTypeOptions"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </apex:pageBlockSectionItem>
+                                </apex:pageBlockSection>
+                            </apex:actionRegion>
+                        </apex:outputPanel>
+                        <apex:outputPanel id="pageType" html-automationid="PageTypePanel">
+                            <apex:actionRegion >
+                                <apex:actionFunction name="redrawWebQuoteDetail" action="{!null}" rerender="websiteQuote"/>
+                                <apex:pageBlocksection columns="2" rendered="{!(includeWebsiteType == 'lead capture' && includeWebsiteQuote == 'true')}">
+                                    <apex:pageBlockSectionItem >
+                                        <apex:outputPanel layout="block" style="width:300px;">Select Lead Capture Type</apex:outputPanel>
+                                        <apex:outputPanel layout="block" styleClass="requiredInput">
+                                            <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                                            <apex:selectList id="lpOptions" value="{!leadCaptureTypeOptions}" multiselect="false" size="1" required="true" tabIndex="1" onchange="redrawWebQuoteDetail();" html-automationid="LeadCaptureTypeOptionsList">
+                                                <apex:selectOptions value="{!leadCapturePageType}" html-automationid="LeadCapturePageTypeOptions"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </apex:pageBlockSectionItem>
+                                </apex:pageBlockSection>
+                                <apex:pageBlocksection columns="1" rendered="{!(includeWebsiteType == 'full' && includeWebsiteQuote == 'true')}">
+                                    <apex:pageBlockSectionItem >
+                                        <apex:outputPanel layout="block" style="width:300px;">Choose Package</apex:outputPanel>
+                                        <apex:outputPanel layout="block" styleClass="requiredInput">
+                                            <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                                            <apex:selectList id="fpOptions" value="{!fullPageTypeOptions}" multiselect="false" size="1" required="true" tabIndex="1" onchange="redrawWebQuoteDetail();" html-automationid="FullPageTypeOptionsList">
+                                                <apex:selectOptions value="{!fullPageOptions}" html-automationid="FullPageOptions"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </apex:pageBlockSectionItem>
+                                    <br/>
+                                </apex:pageBlockSection>
+                            </apex:actionRegion>
+                        </apex:outputPanel>
+                        <apex:outputPanel id="websiteQuote" html-automationid="WebstieQuotePanel">
+                            <apex:pageBlockSection title="Enter Site Details" columns="1" rendered="{!(includeWebsiteType == 'full' && includeWebsiteQuote == 'true')}" collapsible="false"
+                            html-automationid="CustomSiteDetailsSection">
+                                <apex:pageBlockSection id="ECommSite" columns="1" rendered="{!fullPageTypeOptions == 'custom'}">  
+                                   <apex:pageBlockSectionItem >
+                                     <apex:outputLabel value="Is This An ECommerce Website?" html-automationid="ECommLabel" style="width:500px;"/>
+                                    <apex:actionRegion >
+                                        <apex:inputField value="{!WebsiteRequest.GLW_ECommerce_Site__c}"  required="true" label="Is This An ECommerce Website?" html-automationid="LeadEcommerceWebsiteIn">
+                                             <apex:actionSupport event="onchange" rerender="ECommSite" status="status" />
+                                        </apex:inputField>    
+                                    </apex:actionRegion>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:inputField value="{!WebsiteRequest.GLW_E_commerce_Products__c}" label="How Many E-commerce Products?" 
+                                        required="{!WebsiteRequest.GLW_ECommerce_Site__c == 'Yes'}"
+                                        rendered="{!WebsiteRequest.GLW_ECommerce_Site__c == 'Yes'}"/>
+                                    <apex:inputField value="{!WebsiteRequest.Copywriting_required_for_products__c}" label="Will copywriting be required for products?" 
+                                        required="{!WebsiteRequest.GLW_ECommerce_Site__c == 'Yes'}"
+                                        rendered="{!WebsiteRequest.GLW_ECommerce_Site__c == 'Yes'}"/>
+                                    <apex:inputField value="{!WebsiteRequest.Data_migration_required__c}" label="Will data migration from an existing platform be required (for orders, customers and/or products)?" 
+                                        required="{!WebsiteRequest.GLW_ECommerce_Site__c == 'Yes'}"
+                                        rendered="{!WebsiteRequest.GLW_ECommerce_Site__c == 'Yes'}"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection id="ECommSite2" columns="2" rendered="{!fullPageTypeOptions == 'custom'}">  
+                                    <apex:inputField value="{!WebsiteRequest.GLW_Website_Budget__c}" required="true" label="What is the Website Budget Range?" html-automationid="LeadCutomWebsiteBudgetIn"/>
+                                    <apex:inputField value="{!WebsiteRequest.GLW_Website_Compl_Time__c}" required="true" label="What is the customer website completion timeframe?" html-automationid="LeadWebsiteCompTimeIn"/>
+                                    <apex:inputField value="{!WebsiteRequest.GLW_Write_Content__c}" required="true" label="Will the client need us to write content?" html-automationid="LeadWriteContentIn"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="2" rendered="{!(fullPageTypeOptions == 'custom' || fullPageTypeOptions == 'SitePlus' || fullPageTypeOptions == 'SiteEss')}">
+                                    <apex:pageBlockSectionItem >
+                                        <apex:outputPanel layout="block" html-automationid="ClientExistingUrlPanel">Does the client have an existing URL?</apex:outputPanel>
+                                        <apex:outputPanel >
+                                            <apex:actionRegion >
+                                                <apex:actionFunction name="updateRedesign" action="{!null}" rerender="newOrRedesign,newOrRedesignURL,clientUrlPanel"/>
+                                                <apex:inputField value="{!WebsiteRequest.GLW_Website_New_Or_Redesign__c}" required="true" onchange="updateRedesign();" html-automationid="LeadWebsiteNewOrRedesignIn"/>
+                                            </apex:actionRegion>
+                                        </apex:outputPanel>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:outputPanel id="clientUrlPanel">
+                                     <apex:pageBlockSection >
+                                        <apex:inputField value="{!WebsiteRequest.Client_s_URL__c}" required="true" rendered="{!WebsiteRequest.GLW_Website_New_Or_Redesign__c == 'Yes'}"></apex:inputField>
+                                     </apex:pageBlockSection>
+                                     </apex:outputPanel>
+                                <apex:inputField value="{!WebsiteRequest.GLW_Is_There_A_Reg_Domain__c}" required="true" label="Is there a registered domain?" rendered="{!fullPageTypeOptions == 'custom'}" html-automationid="LeadRegisteredDomainIn"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSectionItem rendered="{!fullPageTypeOptions == 'custom'}">
+                                    <apex:outputPanel id="newOrRedesign" html-automationid="NewOrRedesignPanel">
+                                        <apex:outputLabel for="URL" value="Enter URL" rendered="{!oneCase.GLW_Website_New_Or_Redesign__c = 'Yes'}" html-automationid="EnterUrlLabel"></apex:outputLabel>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel id="newOrRedesignURL" html-automationid="NewOrRedesignUrlPanel">
+                                        <apex:inputField id="URL" value="{!WebsiteRequest.GLW_Redesign_URL__c}" rendered="{!WebsiteRequest.GLW_Website_New_Or_Redesign__c = 'Yes'}" required="true"  style="width:100%;" html-automationid="LeadRedesignUrlIn"/>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                                <apex:pageBlockSection columns="1" rendered="{!fullPageTypeOptions == 'migServ'}">
+                                      <apex:inputField value="{!WebsiteRequest.Client_s_URL__c}"  required="true"/>
+                                      <apex:inputField value="{!WebsiteRequest.Client_s_CMS_Login_Username__c}"  required="true"/>
+                                      <apex:inputField value="{!WebsiteRequest.Client_s_CMS_Login_Password__c}"  required="true"/>
+                                      <apex:inputField value="{!WebsiteRequest.Client_s_FTP_Login_Username__c}"  required="true"/>
+                                      <apex:inputField value="{!WebsiteRequest.Client_s_FTP_Login_Password__c}"  required="true"/>
+                                      <apex:inputField value="{!WebsiteRequest.Client_s_Database_Login_Username__c}"  required="true"/>
+                                      <apex:inputField value="{!WebsiteRequest.Client_s_Database_Login_Password__c}"  required="true"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" rendered="{!(fullPageTypeOptions == 'migServ' || fullPageTypeOptions == 'SitePlus' || fullPageTypeOptions == 'SiteEss')}">
+                                    <apex:inputField value="{!WebsiteRequest.GLW_Proposal_Notes__c}" required="true"></apex:inputField>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" rendered="{!(fullPageTypeOptions == 'SitePlus' || fullPageTypeOptions == 'SiteEss')}">
+                                    <apex:inputField value="{!WebsiteRequest.GLW_Website_Special_Features__c}" required="true"></apex:inputField>
+                                    <apex:inputField value="{!WebsiteRequest.GLW_Example_Websites__c}" required="true"></apex:inputField>
+                                </apex:pageBlockSection>
+                             </apex:pageBlockSection>
+                            <apex:pageBlockSection columns="1" rendered="{!(fullPageTypeOptions == 'custom' && includeWebsiteType == 'full'  && includeWebsiteQuote == 'true')}" collapsible="false" html-automationid="CustomFullWebsiteQuoteSection">
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel layout="block" style="width:350px;" html-automationid="ClientCurrentOnlinePresencePanel">Does the client currently have an online presence?</apex:outputPanel>
+                                    <apex:outputPanel >
+                                        <apex:actionRegion >
+                                            <apex:actionFunction name="showOnlinePresence" action="{!null}" rerender="OnlinePresencePBS"/>
+                                            <apex:selectList value="{!onlinePresence}" multiselect="false" size="1" onchange="showOnlinePresence();" html-automationid="OnlinePresenceList">
+                                                <apex:selectOptions value="{!yesNoOptions}" html-automationid="OnlinePresenceYesNoOptions"/>
+                                            </apex:selectList>
+                                        </apex:actionRegion>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                            </apex:pageBlockSection>
+                            <apex:pageBlockSection id="OnlinePresencePBS" columns="1" collapsible="false" html-automationid="OnlinePresencePbsSection">
+                                <apex:pageBlockSectionItem rendered="{!(fullPageTypeOptions == 'custom' && includeWebsiteType == 'full' && includeWebsiteQuote == 'true')}" >
+                                    <apex:outputPanel rendered="{!onlinePresence == 'true'}"  layout="block" style="width:350px;" html-automationid="ClientSpecificUrlPanel">Please provide any client-specific URLs</apex:outputPanel>
+                                    <apex:outputPanel rendered="{!onlinePresence == 'true'}"  layout="block" styleClass="requiredInput">
+                                        <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                                        <apex:inputField value="{!WebsiteRequest.GOW_Online_Presence__c}" style="width: 100%;height:50px;" required="true" html-automationid="WebsiteGowOnlinePresenceIn"/>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                            </apex:pageBlockSection>
+                            <apex:pageBlockSection columns="1" rendered="{!(fullPageTypeOptions == 'custom' && includeWebsiteType == 'full'  && includeWebsiteQuote == 'true')}" collapsible="false">
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel layout="block" style="width:350px;" html-automationid="">If there are any websites that you like that we should consider as we assist in the planning of your new website, please list them here and briefly tell us why you like them.</apex:outputPanel>
+                                    <apex:outputPanel layout="block" >
+                                        <apex:outputPanel layout="block" />
+                                        <apex:inputField value="{!WebsiteRequest.GLW_Example_Websites__c}" style="width: 100%;height:75px;" html-automationid="LeadWebsiteExamplesIn"/>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel layout="block" style="width:350px;">Who are the company’s top three target audiences?  Please be specific: What Locations, Markets, Business Size, Industry, Professional Roles, etc.?</apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="requiredInput">
+                                        <apex:inputField value="{!WebsiteRequest.GLW_Target_Audience__c}" style="width: 100%;height:75px;" html-automationid="LeadTargetAudienceIn"/>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel layout="block" style="width:350px;">If your project requires any interactivity or special advanced features, please describe your needs specifically as possible below. Examples of advanced functionality are: login areas, employee access pages, etc.</apex:outputPanel>
+                                    <apex:outputPanel layout="block" >
+                                        <apex:outputPanel layout="block" />
+                                        <apex:inputField value="{!WebsiteRequest.GLW_Website_Special_Features__c}" style="width: 100%;height:75px;" html-automationid="LeadWebsiteSpecialFeaturesIn"/>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel layout="block" style="width:350px;">Give us a brief overview of the project to help us determine how many pages the site will be. Please be as detailed as possible and focus on features, functionality and pages, not design aspects (This will be covered during the design phase of the project).</apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="requiredInput">
+                                        <apex:inputField value="{!WebsiteRequest.GLW_Website_Page_Map__c}" style="width: 100%;height:75px;" html-automationid="LeadWebsitePageMapIn"/>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                            </apex:pageBlockSection>
+                        </apex:outputPanel>
+                        <apex:outputPanel id="websiteQuoteAtt" html-automationid="WebsiteQuoteAttPanel">
+                            <apex:pageBlockSection columns="1" id="WebsiteQuoteUpload" title="Attachment" collapsible="false" rendered="{!includeWebSiteQuote='true'}" html-automationid="WebsiteQuoteUploadSection">
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputPanel layout="block" style="width:200px;"></apex:outputPanel>
+                                    <apex:outputLabel value="Max attachment size is 4Mb" />
+                                </apex:pageBlockSectionItem>
+                                <apex:pageBlockSectionItem id="WebsiteQuoteUploadSection1" html-automationid="WebsiteQuoteUploadSection1">
+                                    <apex:outputLabel value="" />
+                                    <apex:outputPanel >
+                                        <apex:inputFile id="WebsiteQuoteFileUpload" fileName="{!websiteQuoteReportingUploadAttachment.AttachmentName}"
+                                                        contentType="{!websiteQuoteReportingUploadAttachment.AttachmentContentType}"
+                                                        value="{!websiteQuoteReportingUploadAttachment.AttachmentBody}"
+                                                        onchange="uploadFile('{!$Component.WebsiteQuoteFileUpload}',  '{!$Component.WebsiteQuoteUpload.WebsiteQuoteUploadSection2.WebsiteQuoteAttachmentName}', '{!$Component.WebsiteQuoteUpload.WebsiteQuoteUploadSection2.WebsiteQuoteattachmentBody}', '{!$Component.WebsiteQuoteUpload.WebsiteQuoteUploadSection2.WebsiteQuoteAttachmentContentType}');"></apex:inputFile>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                                <apex:pageBlockSectionItem id="WebsiteQuoteUploadSection2" html-automationid="WebsiteQuoteUploadSection2">
+                                    <apex:outputLabel value=""></apex:outputLabel>
+                                    <apex:outputPanel >
+                                        <apex:actionRegion >
+                                            <apex:commandButton action="{!websiteQuoteReportingUploadAttachment.uploadAttachment}"
+                                                                value="Upload Attachment"
+                                                                reRender="WebsiteQuoteAttachmentId, WebsiteQuoteFileAttachmentLink, WebsiteQuoteattachmentBody,WebsiteQuoteAttachmentName,WebsiteQuoteAttachmentContentType"
+                                                                status="status" />
+                                            <apex:inputHidden value="{!websiteQuoteReportingUploadAttachment.AttachmentBody}"
+                                                              html-clearfileattachment="true"
+                                                              id="WebsiteQuoteattachmentBody" 
+                                  html-automationid="AttachmentBodyInHidden"/>
+                                            <apex:inputHidden value="{!websiteQuoteReportingUploadAttachment.AttachmentName}"
+                                                              id="WebsiteQuoteAttachmentName" 
+                                  html-automation="AttachmentNameInHidden"/>
+                                            <apex:inputHidden value="{!websiteQuoteReportingUploadAttachment.AttachmentContentType}"
+                                                              id="WebsiteQuoteAttachmentContentType" 
+                                  html-automationid="AttachmentContentTypeInHidden"/>
+                                            <apex:inputHidden value="{!websiteQuoteReportingUploadAttachment.AttachmentId}"
+                                                              id="WebsiteQuoteAttachmentId" 
+                                  html-automationid="AttachmentIdInHidden"/>
+                                            <apex:outputLink Id="WebsiteQuoteFileAttachmentLink"
+                                                             value="/servlet/servlet.FileDownload?file={!websiteQuoteReportingUploadAttachment.AttachmentId}"
+                                                             target="_blank">{!IF(websiteQuoteReportingUploadAttachment.AttachmentId == NULL, '' ,websiteQuoteReportingUploadAttachment.AttachmentName)}</apex:outputLink>
+                                        </apex:actionRegion>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSectionItem>
+                            </apex:pageBlockSection>
+                        </apex:outputPanel>
+                        <br/>
+                    </apex:outputPanel>
+                </apex:pageBlock>
+            </apex:form>
+            <div id="tooltip" style="display:none;">
+                <apex:outputText value="{!$Label.Browser_Support + $Label.DigAudHelp1 + $Label.DigAudHelp2}" escape="false"/>
+            </div>
+        </apex:define>
+    </apex:composition>
+    <script type="text/javascript">
+           $j = jQuery.noConflict();
+           $j(document).ready(
+               function() {
+                    $j(".tel-mask").mask("(999) 999-9999? x99999");
+                    $j('select[id$=mediaPartners]').twinBoxMultiSelectList({
+                            availableList : 'span[id$=availableMediaPartners]',
+                            selectedList : 'span[id$=selectedMediaPartners]',
+                            searchBox : '#searchTextBox',
+                            styles: {
+                                width: '220px'
+                            }
+                        });
+               });
+    </script>
+    <script type="text/javascript">
+        $j = jQuery.noConflict();
+        var ctn = $j('#tooltip').html();
+        $j('#helpme').poshytip({content:ctn, alignTo:'target', alignX:'inner-right'});
+    </script>
+    <script type="text/javascript">
+     J$ = jQuery.noConflict();
+                J$(document).ready(function(){  
+                    
+                    J$(".tel-mask").mask("(999) 999-9999? x99999");
+                    J$(document).on("keypress", ".inputSearchText", function(event){  
+                        
+                    var keycode = (event.keyCode ? event.keyCode : event.which);
+                    if(keycode == '13'){ 
+        
+                    J$(".searchByMe").click();  
+                    return false;    
+                     }
+                     }); 
+
+                }); 
+                function maskPhone(){   
+                    J$(".tel-mask").mask("(999) 999-9999? x99999");
+                }
+    </script>
+</apex:page>
