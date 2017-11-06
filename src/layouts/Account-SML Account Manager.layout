@@ -28,6 +28,10 @@
                 <behavior>Readonly</behavior>
                 <field>Company_ID__c</field>
             </layoutItems>
+			<layoutItems>
+				<behavior>Edit</behavior>
+				<field>Advertiser_External_ID__c</field>
+			</layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Reporting_Group__c</field>
