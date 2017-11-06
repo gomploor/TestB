@@ -5,6 +5,11 @@
         <field>OnBoardFormModel__c.Domain_Transfer_Fee__c</field>
         <readable>true</readable>
     </fieldPermissions>
+	<fieldPermissions>
+        <editable>true</editable>
+        <field>Account.Advertiser_External_ID__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <loginHours/>
     <userLicense>Salesforce</userLicense>
 </Profile>
