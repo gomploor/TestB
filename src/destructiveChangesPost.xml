@@ -24,10 +24,6 @@
 		<members>OnBoardFormModel__c.Email_Hosting_Desired_Email10__c</members>	
         <name>CustomField</name>
     </types>
-	<types>
-        <members>PPC_Destination_URL_Domain_Validation</members>
-		<members>PPCDestinationURLDomainType_Validation</members>
-        <name>ValidationRule</name>
-    </types>
+
     <version>37.0</version>
 </Package>

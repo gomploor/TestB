@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
    <fullName>Pre delete</fullName>
-	
+		<types>
+        <members>PPC_Destination_URL_Domain_Validation</members>
+		<members>PPCDestinationURLDomainType_Validation</members>
+        <name>ValidationRule</name>
+    </types>
    
-    <version>33.0</version>
+    <version>37.0</version>
 </Package>
