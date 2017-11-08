@@ -1,0 +1,228 @@
+<apex:page standardController="OpportunityLineItem" tabStyle="OpportunityLineItem" extensions="OpportunityLineItemUSCPExt"> 
+       <apex:form id="frm">
+    
+    <apex:sectionHeader Title="Opportunity Product" subtitle="{!subtxt}" html-automationid="OppProdHeader"/>
+    <apex:pageBlock title="Opportunity Product Detail" mode="maindetail" html-automationid="OppProdDetailBlock">   
+    <apex:pagemessages escape="false" id="msg"></apex:pagemessages>    
+    <apex:pageblockbuttons id="pgButtons">
+      <!-- <apex:commandButton action="{!editOpportunityProduct}" value="Edit"/> -->
+        
+        <apex:commandButton action="{!editOpportunityProduct}"  value="Edit" html-automationid="EditButton"/>
+        <apex:commandButton rendered="{!canCancelOLI}" action="{!cancelInvoiceLineItems}" value="{!if(OpportunityLineItem.Invoice_CancelDate__c != null && OpportunityLineItem.Invoice_CancelDate__c>today(), 'Edit Cancel OLI', 'Cancel OLI')}" disabled="{!disableCancelOLI}" rerender="frm" html-automationid="CancelButton"/>
+        <apex:commandButton rendered="{!canUpdateAgreement}" action="{!updateAgreement}" value="Update Agreement" disabled="{!((OpportunityLineItem.Sell_Type__c == 'CrossSell' || OpportunityLineItem.Sell_Type__c == 'Auto Extension') || (OpportunityLineItem.Waiting_Status__c == 'Cancelled' || OpportunityLineItem.Waiting_Status__c == 'Kill') || (OpportunityLineItem.Product2.Invoice_Frequency__c =='One Time' || OpportunityLineItem.Product2.Invoice_Frequency__c =='Two Times')) }" html-automationid="UpdateAgreementButton"/>
+        <apex:commandButton action="{!URLFOR(
+                $Action.OpportunityLineItem.Delete,
+                oli.Id,
+               [retURL='/'&oli.OpportunityId]
+                )}" value="Delete" rendered="{!renderDelete}" html-automationid="DeleteButton">
+        </apex:commandButton>
+        <apex:commandButton rendered="{!canAdjustInvoice}" action="{!invoiceAdjustment}" value="Adjust Invoice" html-automationid="AdjustInvoiceButton"/>
+        <apex:commandButton action="{!scheduleOLI}" value="Schedule" disabled="{!disableSchedule}" html-automationid="ScheduleButton" />
+        <apex:commandButton action="{!addSpike}" value="Add Spike" disabled="{!NOT(enableSpike)}" html-automationid="AddSpikeButton"/>
+        <apex:commandButton action="{!invoiceMakeGood}" value="Make Good" disabled="{!disableInvoiceMakeGood}" html-automationid="MakeGoodButton"/>
+        <apex:commandButton rendered="{!canCancelOLI}" action="{!rescueOLI}" disabled="{!diableRescueOLI}" value="Rescue OLI" html-automationid="RescueOliButton"/>
+        <apex:commandButton action="{!createPaymentEntries}"  rendered="{!canCancelOLI}" value="Create Payment Entries" html-automationid="CreatePaymentEntriesButton"/>
+        <apex:commandButton action="{!updateBs}" disabled="{!disableBsSchedule}" value="Change Budget" html-automationid="UpdateBsButton"/>
+        <apex:commandButton action="{!revertOLI}" rendered="{!renderRevertOli}" value="Revert OLI"/>
+        <apex:commandButton action="{!renewal}" rendered="{!renderRenewal}" value="{!renewalLabel}"/>
+        <apex:outputPanel id="cpCreate">
+         <apex:actionStatus id="BegUpdate">
+            <apex:facet name="start">
+                 <apex:image value="/img/loading.gif" title="Processing..."/>
+            </apex:facet>    
+            <apex:facet name="stop">
+                <apex:commandButton action="{!submitCreateCp}" status="BegUpdate" value="Create Campaign Profile" rerender="form, msg, cpCreate" styleClass="btn" rendered="{!createCampaignProfile}">
+                </apex:commandButton>  
+            </apex:facet>
+        </apex:actionStatus>
+        </apex:outputPanel>
+     </apex:pageblockbuttons>    
+    <apex:pageBlockSection collapsible="false" id="color" title="Product Information" html-automationid="ProductInfoSection">
+        <!-- DEV-7085 Relocated Company Name field-->
+       <apex:pageBlockSection >
+	     <apex:pageBlockSectionItem >
+	    <apex:outputLabel value="Campaign Profile"></apex:outputLabel>
+        <apex:outputLink title="{!cp.Campaign_Profile_Name__c}" value="{!'/' + cp.Id}" target="_blank">
+             <apex:outputText label="Campaign Profile" value="{!cp.Campaign_Profile_Name__c}" title="{!cp.Campaign_Profile_Name__c}"></apex:outputText> 
+        </apex:outputLink>
+        </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>    
+       <apex:outputField value="{!OpportunityLineItem.Variable_Billing__c}" html-automationid="VariableBillingOut"/>
+      <apex:outputField value="{!OpportunityLineItem.Opportunity.AccountId}" html-automationid="OppAccountIdOut"/>
+     <apex:outputField value="{!OpportunityLineItem.Sell_Type__c}" html-automationid="SellTypeOut"/>
+      <apex:outputField value="{!OpportunityLineItem.opportunityid}" html-automationid="OppIdOut"/>
+      
+	
+      <apex:outputField value="{!OpportunityLineItem.Invoice_Order_Number__c}" html-automationid="InvoiceOrderNumOut"/>
+      <!-- DEV-7952 End -->
+      <apex:outputField value="{!OpportunityLineItem.Opp_Product_Id__c}" html-automationid="OppProductId"/>
+      <apex:outputField value="{!OpportunityLineItem.Product_OriginalValue__c}" html-automationid="ProdOrginialValueOut"/>
+      <apex:outputField value="{!OpportunityLineItem.ReplicationOLI_TargetID__c}" html-automationid="ReplicateOliTargetIdOut"/>
+      <!-- DEV-8370 Variable Billing CPV Start-->
+	  <apex:outputField value="{!OpportunityLineItem.Current_Product_Value_VB__c}" html-automationid="CurrentProdValueVbOut"/> 
+	  <!-- DEV-8370 Variable Billing CPV End-->
+      <apex:outputField value="{!OpportunityLineItem.ReplicationOLI_SourceID__c}" html-automationid="ReplicateOliSourceIdOut"/>
+      <apex:outputText value="" />
+      <apex:outputText label="Product" value="{!ProdName}" html-automationid="ProductOut"/>
+      <apex:outputText value="" />
+      <apex:outputField value="{!OpportunityLineItem.Package__c}"/>
+      <apex:outputField value="{!OpportunityLineItem.Qty_ContractMonths__c}" html-automationid="QtyContractMonthsOut"/>
+      <apex:outputField value="{!OpportunityLineItem.Notes__c}" html-automationid="NotesOut"/>
+      <apex:outputField value="{!OpportunityLineItem.Related_OLI__c}" html-automationid="RelatedOliOut"/> 
+      <apex:outputField value="{!OpportunityLineItem.SLA_Product_Type__c}" html-automationid="SlaProdTypeOut"/>
+      <apex:outputField value="{!OpportunityLineItem.Original_Related_OLI__c}"/>
+      <apex:outputField value="{!OpportunityLineItem.Active_Product__c}" html-automationid="ActiveProdOut"/>
+      <apex:outputText value="" />
+      <apex:outputField label="Fulfillment Specialist" value="{!OpportunityLineItem.Fulfillment_Specialist__r.name}" html-automationid="FulfillmentSpecialistOut"/>
+    </apex:pageBlockSection>
+    <c:BillingScheduleComp oppLineItemId="{!OpportunityLineItem.id}" html-automationid="BillingScheduleCompList"></c:BillingScheduleComp> 
+    <apex:pageBlockSection collapsible="true" title="Price Calculation Information" columns="2" html-automationid="PriceCalcInfoSection">
+        <apex:outputField value="{!OpportunityLineItem.NumberOfLocations__c}" html-automationid="NumOfLocationsOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Email_Recipients_Qty__c}" html-automationid="EmailRecipientsQtyOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Invoice_PriceVariable__c}" html-automationid="InvoicePriceVariableOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.CPV__c}" html-automationid="CPVOut"/>
+        <apex:outputText value="" />        
+        <apex:outputText value="" />
+        <apex:outputText value=""/>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="Fulfillment Information" columns="2" html-automationid="FulfillmentInfoSection">
+        <apex:outputField value="{!OpportunityLineItem.Project_Initiation_Date__c}" html-automationid="ProjInitiationDateOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Waiting_Status__c}" html-automationid="WaitingStatusOut"/>
+        <!-- DEV-7085: Show Created Date Field-->
+        <apex:outputField value="{!OpportunityLineItem.CreatedDate}" html-automationid="CreateDateOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Sub_Status__c}" html-automationid="SubStatusOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Invoice_ServiceStartDate__c}" html-automationid="InvoiceServiceStartDateOut"/>
+        <apex:outputField value="{!OpportunityLineItem.FulfillmentStatus__c}" html-automationid="FulfillmentStatusOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Invoice_ServiceEndDate__c}" html-automationid="InvoiceServiceEndDateOut"/>
+        <apex:outputField value="{!OpportunityLineItem.AMP_PPC_Start_Date__c}" html-automationid="AmpPpcStartDateOut"/>
+        <apex:outputField value="{!OpportunityLineItem.OnBoard_Date__c}" html-automationid="OnBoardDateOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Waiting_Status_Descr__c}" html-automationid="WaitingStatusDescrOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Fulfilled_Date__c}" html-automationid="FulfilledDateOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Marketing_Campaign__c}" html-automationid="MarketingCampaignOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Live_Date__c}" html-automationid="LiveDateOut"/>
+        <apex:outputText label="Last Modified By" value="{!LastMod}" html-automationid="LastModifiedByOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Days_To_Live__c}" html-automationid="DaysToLiveOut"/> 
+        <apex:outputText value="" />  
+        <apex:outputField value="{!OpportunityLineItem.Days_To_Go_Live__c}" html-automationid="DaysToGoLiveOut"/>
+        <apex:outputText value="" />
+        <apex:outputField value="{!OpportunityLineItem.ServiceDate}" html-automationid="ServiceDateOut"/>
+        <apex:outputText value="" />
+        <apex:outputField value="{!OpportunityLineItem.End_Date__c}" html-automationid="EndDateOut"/>
+        <apex:outputText value="" />
+        <apex:outputField value="{!OpportunityLineItem.Expiration_Date__c}" html-automationid="ExpirationDateOut"/>
+        <apex:outputText value="" />
+        <apex:outputField value="{!OpportunityLineItem.Renewed__c}" html-automationid="RenewedOut"/>
+    </apex:pageBlockSection>
+        
+    <apex:pageBlockSection title="Cancel Information" columns="2" html-automationid="CancelInfoSection">
+        <apex:outputField value="{!OpportunityLineItem.Canceled__c}" html-automationid="CanceledOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Cancellation_Category__c}" html-automationid="CancellationCategoryOut"/> 
+        <apex:outputField value="{!OpportunityLineItem.Waive_Fees__c}" html-automationid="WaiveFeeOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Cancellation_Reason__c}" html-automationid="CancellationReasonOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Product_PorC_Date__c}" html-automationid="ProdPorcDateOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Cancellation_Detail__c}" html-automationid="CancellationDetailOut"/>
+        <apex:outputField value="{!OpportunityLineItem.Invoice_CancelDate__c}" html-automationid="InvoiceCancelDateOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.How_are_marketing_dollars_spent__c}" label="How are marketing dollars spent? (Strategy Change)" html-automationid="HowMarketingDollarsSpentOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Lost_To_Competitor__c}" html-automationid="LostToCompetitorOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Other_Competitor__c}" html-automationid="OtherCompetitorOut"/>
+        <apex:outputText value=""/>
+        <apex:outputText value="{!OpportunityLineItem.Non_Renewal_Reason__c}" html-automationid="NonRenewalReasonOut"/>
+        <apex:outputText value=""/>
+        <apex:outputText value="{!OpportunityLineItem.Non_Renewal_Details__c}" html-automationid="NonRenewalDetailsOut"/>
+        <apex:outputText value=""/>
+        <apex:outputText value="{!OpportunityLineItem.Non_Renewal_Lost_To_Competitor__c}" html-automationid="NonRenewalLostToCompetitorOut"/>
+        <apex:outputText value=""/>
+        <apex:outputText value="{!OpportunityLineItem.Non_Renewal_Other_Competitor__c}" html-automationid="NonRenewalOtherCompetitorOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Rescue_Reason__c}" html-automationid="RescueReasonOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Rescue_Status__c}" html-automationid="RescueStatusOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Successful_Saves__c}" html-automationid="SeccessfulSavesOut"/>
+    </apex:pageBlockSection>
+        
+    <apex:pageBlockSection title="Additional Information" columns="2" html-automationid="AdditionalInfoSection">
+
+        <!-- DEV-7085 -->
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="{!$ObjectType.OpportunityLineItem.fields.Opp_Acct_Id__c.Label}" html-automationid="OppAcctIdOutLabel"/>
+            <apex:outputLink value="/{!OpportunityLineItem.Opportunity.AccountId}" html-automationid="OppAccountIdLink">{!OpportunityLineItem.Opp_Acct_Id__c}</apex:outputLink>
+             </apex:pageBlockSectionItem> 
+        <apex:outputField value="{!OpportunityLineItem.Opp_Owner__c}" html-automationid="OppOwnerOut"/>
+        <apex:outputField value="{!OpportunityLineItem.CreatedById}" html-automationid="CreatedByIdOut"/><!-- DEV-7085 --> 
+        <!-- DEV-9418 Starts -->
+        <apex:outputField value="{!OpportunityLineItem.Senior_Account_Manager__c}" label="Senior Account Manager" html-automationid="SeniorAccountManagerOut"/>
+        <apex:outputText value=""/>
+         <!-- DEV-9418 Ends -->
+        <apex:outputField value="{!OpportunityLineItem.Dig_Account_Manager__c}" label="Dig - Account Manager" html-automationid="DigAccountManagerOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Dig_Project_Manager__c}" html-automationid="DigProjectManagerOut"/><!-- DEV-7085 -->
+        <apex:outputField value="{!OpportunityLineItem.Project__c}" html-automationid="ProjectOut"/>
+        <apex:outputField value="{!opportunitylineItem.Email_Coordinator__c}" html-automationid="EmailCoordinatorOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!opportunitylineItem.Web_Coordinator__c}" html-automationid="WebCoordinatorOut"/>
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Affl_Sales_Rep__c}" label="Affl Sales Rep Name" html-automationid="AfflSalesRepOut"/><!-- DEV-7085 -->
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Opportunity.Media_Partner__c}" label="Media Partner Name" html-automationid="OppMedaiPartnerOut"/><!-- DEV-7085 -->
+        <apex:outputText value=""/>
+        <apex:outputField value="{!OpportunityLineItem.Notify_Email_1__c}" html-automationid="NotifyEmail1Out"/>
+        <apex:outputText value="" />
+        <apex:outputField value="{!OpportunityLineItem.Notify_Email_2__c}" html-automationid="NotifyEmail2Out"/>
+        <apex:outputText value="" />
+        <apex:outputField value="{!OpportunityLineItem.Notify_Email_3__c}" html-automationid="NotifyEmail3Out"/>
+    </apex:pageBlockSection>
+   <apex:pageBlockSection title="Status History" columns="1" html-automationid="StatusHistorySection">
+        <apex:pageblocktable value="{!HistoryTrackRecords}" var="histRec" html-automationid="HistoryTrackRecordsTable">
+         <apex:column >
+           <apex:facet name="header">
+           <apex:outputPanel layout="none">
+             <apex:outputLabel value="Order of Occurrence" html-automationid="OrdOfOccurrenceOutLabel"/>  
+            </apex:outputPanel>
+           </apex:facet>
+              <apex:outputtext value="{!histRec.orderOfOccurence}" html-automationid="OrdOfOccurenceOut"/>
+         </apex:column>
+         <apex:column >
+           <apex:facet name="header">
+           <apex:outputPanel layout="none">
+             <apex:outputLabel value="Status" html-automationid="StatusOutLabel"/>  
+            </apex:outputPanel>
+           </apex:facet>
+             <apex:outputtext value="{!histRec.record.OLI_Stage__c}" html-automationid="OliStageOut"/>
+         </apex:column>
+      
+         <apex:column >
+           <apex:facet name="header">
+           <apex:outputPanel layout="none">
+             <apex:outputLabel value="Time In" html-automationid="TimeInOutLabel"/>  
+            </apex:outputPanel>
+           </apex:facet>
+             <apex:outputtext value="{!histRec.TimeInFormatted}" html-automationid="TimeInFormattedOut"/>
+         </apex:column>
+        
+         <apex:column >
+           <apex:facet name="header">
+           <apex:outputPanel layout="none">
+             <apex:outputLabel value="Updated By" html-automationid="UpdatedByOutLabel"/>  
+            </apex:outputPanel>
+           </apex:facet>
+             <apex:outputtext value="{!histRec.record.CreatedBy.Name}" html-automationid="CreatedByNameOut"/>
+         </apex:column>
+     </apex:pageblocktable> 
+        
+    </apex:pageBlockSection>
+    
+    <c:InvoiceLineItemComp oppLineItemId="{!OpportunityLineItem.id}" profileName="{!loggedInUser.Profile.Name}" html-automationid="InvoiceLineItemComp"></c:InvoiceLineItemComp>
+    <c:OrderItemComp oppLineItemId="{!OpportunityLineItem.id}" html-automationid="OrderItemComp"></c:OrderItemComp>       
+    <c:OliHistoryDetailComp oppLineItemId="{!OpportunityLineItem.id}" html-automationid="OliHistoryDetailComp"></c:OliHistoryDetailComp>    
+    <c:BudgetCalculatorComp oppLineItemId="{!OpportunityLineItem.id}" rendered="false" html-automationid="BudgetCalculatorComp"></c:BudgetCalculatorComp>
+    </apex:pageBlock>
+    </apex:form>
+    <apex:relatedList title="Schedule" list="OpportunityLineItemSchedules"/>
+</apex:page>
