@@ -11,12 +11,20 @@ public without sharing class BillingScheduleCompCntrl {
         public Boolean renderUnits {get;set;}
         public Boolean renderPackage {get;set;}
     	Public List<Billing_Schedule__c> billingScheduleList; 
+		public String renewalOli {set;get;}
 	
 	public BillingScheduleCompCntrl() {
 		
 		billingScheduleList = new List<Billing_Schedule__c>();
 
     }
+	//DEV-14945.
+	public BillingScheduleCompCntrl(ApexPages.StandardController controller){
+        if(renewalOli == null){
+        renewalOli = System.currentPageReference().getParameters().get('useNewOli');
+        }
+    }
+	
     /* DEV-11150 - Commented due to the Variable Billing record deletion done in DEV-10686
     //DEV-10451 
     public BillingScheduleCompCntrl(ApexPages.StandardController stdController) 

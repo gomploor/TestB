@@ -1,8 +1,14 @@
 <apex:page standardController="Campaign_Profile__c" standardStylesheets="true" rendered="{!Campaign_Profile__c.Opportunity_Product_ID__c != null}" showHeader="false" sidebar="false">
     <apex:includeScript value="https://code.jquery.com/jquery-3.1.1.js"/>
-    <apex:pageBlock >   
+    <apex:pageBlock rendered="{!If(!(renewalOli == 'true'), true, false)}">   
            <apex:outputpanel layout="block" styleClass="BillingScheduleRelatedList">
                 <c:BillingScheduleComp oppLineItemId="{!Campaign_Profile__c.Opportunity_Product_ID__c}" html-automationid="BillingScheduleComp"/>
+           </apex:outputpanel>         
+    </apex:pageBlock>
+	<!-- DEV-14945 -->
+	<apex:pageBlock rendered="{!If(renewalOli == 'true' && Campaign_Profile__c.OLI_ID__c != Null, true, false)}">   
+           <apex:outputpanel layout="block" styleClass="BillingScheduleRelatedList">
+                <c:BillingScheduleComp oppLineItemId="{!Campaign_Profile__c.OLI_ID__c}" html-automationid="BillingScheduleComp"/>
            </apex:outputpanel>         
     </apex:pageBlock>
     <style>
