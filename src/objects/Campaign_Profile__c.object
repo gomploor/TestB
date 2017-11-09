@@ -21,4 +21,30 @@
             </valueSetDefinition>
         </valueSet>
     </fields>
+    <recordTypes>
+        <fullName>History</fullName>
+        <active>true</active>
+        <description>History records</description>
+        <label>History</label>
+        <picklistValues>
+            <picklist>Contract_Completion_Pause_Task__c</picklist>
+            <values>
+                <fullName>Submitted</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+    </recordTypes>
+    <recordTypes>
+        <fullName>PPC</fullName>
+        <active>true</active>
+        <description>PPCrecord type for Campaign Profile</description>
+        <label>PPC</label>
+        <picklistValues>
+            <picklist>Contract_Completion_Pause_Task__c</picklist>
+            <values>
+                <fullName>Submitted</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+    </recordTypes>
 </CustomObject>
