@@ -78,7 +78,10 @@
 			<runTest>WorkFlowApexRuleHanlder_Test</runTest>	
 			<runTest>afteronOpportunityProduct_class</runTest>	
 			<runTest>OpportunityLineItemBeforeUpdate_Test</runTest>	
-			<runTest>OpportunityLineItemUSCPExt_Test</runTest>				
+			<runTest>OpportunityLineItemUSCPExt_Test</runTest>	
+			<runTest>FICAfterInsertTriggerHandler_Test</runTest>
+			<runTest>FIIAfterInsertTriggerHandler_Test</runTest>	
+			<runTest>ChatterIssues_Test</runTest>			
 		</sf:deploy>		
 	</target>
 	
