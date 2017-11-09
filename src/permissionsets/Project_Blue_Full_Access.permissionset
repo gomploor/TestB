@@ -20,9 +20,28 @@
         <object>QA_Result__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
+	<objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>true</modifyAllRecords>
+        <object>Delegate_User__c</object>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
 	<fieldPermissions>
         <editable>true</editable>
         <field>Campaign_Profile__c.Contract_Completion_Pause_Task__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+	 <fieldPermissions>
+        <editable>true</editable>
+        <field>Delegate_User__c.User_Delegate__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Delegate_User__c.User__c</field>
         <readable>true</readable>
     </fieldPermissions>
 </PermissionSet>

@@ -34,7 +34,10 @@
         <name>CustomObject</name>
     </types>
 	-->
-	
+	<types>
+        <members>Delegate_User__c</members>
+        <name>CustomObject</name>
+    </types>
 	<types>
         <members>*</members>
         <name>ApexClass</name>
