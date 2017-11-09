@@ -75,7 +75,9 @@
 			<runTest>OnBoardFormBeforeInsert_Test</runTest>
 			<runTest>OnBoardFormControllerExt_Test</runTest>
 			<runTest>DigitalAuditExtension_Test</runTest>			
-			<runTest>WorkFlowApexRuleHanlder_Test</runTest>			
+			<runTest>WorkFlowApexRuleHanlder_Test</runTest>	
+			<runTest>afteronOpportunityProduct_class</runTest>	
+			<runTest>OpportunityLineItemBeforeUpdate_Test</runTest>				
 		</sf:deploy>		
 	</target>
 	
