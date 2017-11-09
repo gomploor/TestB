@@ -82,11 +82,14 @@ public without sharing class FICAfterUpdateTriggerHandler extends TriggerHandler
     
     public void postToChatter(List<WR_BPM__Flow_Instance_Cursor__c> cursorList, Map<Id, WR_BPM__Flow_Instance_Cursor__c> oldCursorMap){
         
+        String completeStatus = 'Complete';
+        
         List<WR_BPM__Flow_Instance_Cursor__c> curList = new List<WR_BPM__Flow_Instance_Cursor__c>();
         List<WR_BPM__Flow_Instance_Cursor__c> oldCurList = new List<WR_BPM__Flow_Instance_Cursor__c>();
         
         for(WR_BPM__Flow_Instance_Cursor__c cur :cursorList){
-            if(cur.WR_BPM__Step_Assigned_To__c != oldCursorMap.get(cur.Id).WR_BPM__Step_Assigned_To__c){
+            if(cur.WR_BPM__Step_Assigned_To__c != oldCursorMap.get(cur.Id).WR_BPM__Step_Assigned_To__c || 
+              (cur.WR_BPM__Status__c == completeStatus && cur.WR_BPM__Status__c != oldCursorMap.get(cur.Id).WR_BPM__Status__c)){
                 curList.add(cur);
                 oldCurList.add(oldCursorMap.get(cur.Id));
             }
