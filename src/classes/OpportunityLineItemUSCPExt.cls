@@ -567,7 +567,7 @@ public class OpportunityLineItemUSCPExt{
 
     }
    
-   private Opportunity getOpp(Id oppId){
+   public Opportunity getOpp(Id oppId){
        Map<String, Schema.SObjectField> fieldMapCp = Schema.SObjectType.Opportunity.fields.getMap();
         String query;
         for(Schema.SObjectField fld :fieldMapCp.values()){
@@ -1207,7 +1207,7 @@ public class OpportunityLineItemUSCPExt{
     }
     
     @future 
-    static void createCp(Set<Id> oliId){
+    public static void createCp(Set<Id> oliId){
           OpportunityLineItem oliCp = [Select Id, Account__c, Account__r.Tier__c, Account__r.Account_Primary_Industry__c,  Account__r.Account_Primary_Focus__c, 
                     Product2.Name, Affl_Sales_Rep__r.Name, Affl_Sales_Rep__r.Email, Project__c, AccountAsText__c,
                     Opportunity.Notify_Email_1__c, Opportunity.Notify_Email_2__c, Opportunity.Notify_Email_3__c, Qty_ContractMonths__c, 
