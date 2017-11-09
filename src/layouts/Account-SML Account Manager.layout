@@ -590,6 +590,11 @@
     </relatedLists>
     <relatedLists>
         <fields>NAME</fields>
+		<fields>Product_Classification__c</fields>
+        <fields>Max_Ois_to_Date__c</fields>
+        <fields>Total_Ois_Budget__c</fields>
+        <fields>CREATEDBY_USER</fields>
+        <fields>UPDATEDBY_USER</fields>
         <relatedList>Marketing_Campaign__c.Company__c</relatedList>
     </relatedLists>
     <relatedLists>
