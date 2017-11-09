@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <fullName>Contract_Completion_Pause_Task__c</fullName>
+        <externalId>false</externalId>
+        <inlineHelpText>Submit a Pause task request and update &apos;Estimated Launch Date&apos; on Maintenance Campaign Profile to match the contract End of Service Date of the Related OLI</inlineHelpText>
+        <label>Contract Completion Pause Task</label>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+        <valueSet>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>Submitted</fullName>
+                    <default>false</default>
+                    <label>Submitted</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
+    </fields>
+    <recordTypes>
+        <fullName>History</fullName>
+        <active>true</active>
+        <description>History records</description>
+        <label>History</label>
+        <picklistValues>
+            <picklist>Contract_Completion_Pause_Task__c</picklist>
+            <values>
+                <fullName>Submitted</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+    </recordTypes>
+    <recordTypes>
+        <fullName>PPC</fullName>
+        <active>true</active>
+        <description>PPCrecord type for Campaign Profile</description>
+        <label>PPC</label>
+        <picklistValues>
+            <picklist>Contract_Completion_Pause_Task__c</picklist>
+            <values>
+                <fullName>Submitted</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+    </recordTypes>
+</CustomObject>
