@@ -1,0 +1,123 @@
+/*
+The following Script updates 
+Process Path:
+		Process Tab
+		Targeted Email> 
+		Targeted Email Build Processes>
+		Targeted Email Build Sub Processes>
+
+Process Name: Onboarding/Asset Collection
+Step Name : QA Criteria Sheet
+
+Process Name: Custom Design 
+Step Name : Peer Design Proof QA
+
+Process Name: Custom Design 
+Step1 Name : Peer Design Proof QA
+Step2 Name : Deployment QA
+
+Process Name: Client Provided
+Step Name : Deployment to QA
+
+Process Name: Template/Theme
+Step Name : Deployment to QA
+
+Desciption of change: 
+Adding QA Field Clearence Actions and updating url params
+*/
+
+String sourceStepGuid = '00D2F0000008hofUAAc000d0614e8e0ca29022dd15a237571b';  
+Set<String> targetStepsGuid = new Set<String>();
+targetStepsGuid.add('00DA0000000HEOtMAOb575519f501c2e8bfd3a8bf969b655f1'); //Onboarding/Asset Collection
+targetStepsGuid.add('00DA0000000HEOtMAOa7fde6082a60d7a7c72f21f8fdd0bdf3'); //Custom Design
+targetStepsGuid.add('00DA0000000HEOtMAO1b5aa1eca89d051622fbcba0545ce56d'); //Custom Design
+targetStepsGuid.add('00DA0000000HEOtMAO596357c9f89682949307756e5fd60b88'); //Client Provided 
+targetStepsGuid.add('00DA0000000HEOtMAOe6422b3de3bdcf79b8bc644d95bc8c7e'); //Template/Theme
+
+//Query Source Step QA Actions				
+List<WR_BPM__Flow_Step_Action__c> sourceStepActions = 
+			[Select Id, Name from WR_BPM__Flow_Step_Action__c 
+				Where WR_BPM__Flow_Step__r.WR_BPM__Guid__c =:sourceStepGuid];
+Set<String> removeKeys = new Set<String>{
+											'CreatedDate',
+											'LastModifiedDate',
+											'IsDeleted',
+											'attributes',
+											'SystemModstamp',
+											'OwnerId',
+											'CreatedById',
+											'CreatedDate',
+											'Id',
+											'LastModifiedById'
+										};
+Map<String,Id> mapUniqueStepActions = new Map<String,Id>();
+//Get Unique Action Name 
+for(WR_BPM__Flow_Step_Action__c oneStepAction: sourceStepActions) {
+	mapUniqueStepActions.put(oneStepAction.Name, oneStepAction.Id);
+}
+System.debug(JSON.SerializePretty(mapUniqueStepActions));
+
+//Query Target Actions and Check If the script has run already
+List<WR_BPM__Flow_Step_Action__c> targetStepActions = 
+			[Select Id, Name from WR_BPM__Flow_Step_Action__c 
+				Where WR_BPM__Flow_Step__r.WR_BPM__Guid__c =:targetStepsGuid and Name IN :mapUniqueStepActions.KeySet()];
+if(targetStepActions!=null && targetStepActions.Size()>0){
+   System.debug(JSON.SerializePretty(targetStepActions));	
+   throw new WR_BPM.GenericException('Already Ran Once');
+}			
+//Query Target Steps with Ids
+List<WR_BPM__Flow_Step_Junction__c> targetSteps = [Select Id, Name, WR_BPM__Guid__c, WR_BPM__Flow__r.Name, WR_BPM__Layout_URL_Params__c 
+											from WR_BPM__Flow_Step_Junction__c
+											Where WR_BPM__Guid__c IN:targetStepsGuid];
+
+	
+//now that you have source step actions proceed
+Set<Id> actionIds = new Set<Id>();
+actionIds.addAll(mapUniqueStepActions.Values());
+Set<String> fieldSet = WR_BPM__Flow_Step_Action__c.getSObjectType().getDescribe().fields.getMap().KeySet();
+//Removing query fields WR_BPM__Flow_Step_Action__c
+for(String oneKey: removeKeys){
+   fieldSet.remove(oneKey.toLowerCase());
+}
+String fieldNames = String.Join(new List<String>(fieldSet), ',');
+String query = String.format('Select {0} from {1} ', new String[]{fieldNames, 'WR_BPM__Flow_Step_Action__c'}); 
+List<WR_BPM__Flow_Step_Action__c> lstStepActions = database.query(query + ' Where Id In:actionIds');
+System.debug(JSON.SerializePretty(lstStepActions));	
+
+List<WR_BPM__Flow_Step_Action__c> stepActions2Insert = new List<WR_BPM__Flow_Step_Action__c>();
+for(WR_BPM__Flow_Step_Action__c oneStepAction: lstStepActions){ 
+	Map<String, Object> cObjMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serializePretty(oneStepAction));
+	cObjMap.remove('Id');
+	WR_BPM__Flow_Step_Action__c stepAction = (WR_BPM__Flow_Step_Action__c)JSON.deserialize(JSON.serializePretty(cObjMap), 
+			                                        WR_BPM__Flow_Step_Action__c.class);
+	for(WR_BPM__Flow_Step_Junction__c oneStep: targetSteps){
+		//Cloning the above Account Record ac
+		WR_BPM__Flow_Step_Action__c clonedAction  = stepAction.clone(false, false, false, false);
+		clonedAction.WR_BPM__Flow_Step__c = oneStep.Id; 
+		stepActions2Insert.add(clonedAction);
+	}
+}
+if(stepActions2Insert.Size()>0){
+    //insert stepActions2Insert;
+	System.debug('Printing newly Inserted Actions');	
+	System.debug(JSON.SerializePretty(stepActions2Insert));	
+}else{
+	throw new WR_BPM.GenericException('No Step Actions to Insert');
+}
+
+//update targetSteps
+for(WR_BPM__Flow_Step_Junction__c oneStep: targetSteps){
+ 	Map<String, Object> UrlConfig = (Map<String, Object>)JSON.deserializeUntyped(oneStep.WR_BPM__Layout_URL_Params__c);
+    if(UrlConfig!=null){
+        for(String oneKey: UrlConfig.KeySet()){
+            if(oneKey!=null && oneKey.equalsIgnoreCase('redirectURL')){
+                System.debug(UrlConfig.get('redirectURL'));
+                //{"redirectURL":"{$System.ForceOrgUrl}/apex/WorkQueue"}
+                UrlConfig.put('redirectURL', '{$System.ForceOrgUrl}/apex/WorkQueue');
+                oneStep.WR_BPM__Layout_URL_Params__c = JSON.Serialize(UrlConfig); 
+            }
+        }
+    }
+}
+
+
