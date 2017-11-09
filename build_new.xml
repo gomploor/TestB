@@ -75,6 +75,7 @@
 			<runTest>OnBoardFormBeforeInsert_Test</runTest>
 			<runTest>OnBoardFormControllerExt_Test</runTest>
 			<runTest>DigitalAuditExtension_Test</runTest>			
+			<runTest>WorkFlowApexRuleHanlder_Test</runTest>			
 		</sf:deploy>		
 	</target>
 	

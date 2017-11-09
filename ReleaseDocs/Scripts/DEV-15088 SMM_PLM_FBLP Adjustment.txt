@@ -1,0 +1,34 @@
+/*
+The following Script updates 
+Process:
+		Process Tab
+		Social Media Management> 
+		Social Media Management Maintenance Processes>
+		Social Media Management Maintenance Sub Processes>
+		FBLP Adjustment(Process)
+Step Name : Check Copy Instructions
+
+Desciption of change: 
+Out Flow Connector that has conditions are updated
+
+*/
+
+String stepGuid = '00Dg0000001qRv9UA0c0694dfd63e51ad26cd66ed6cac4d768';
+WR_BPM__Flow_Step_Connection__c updateFlowStepConnection 
+		= [Select Id, WR_BPM__Conditions__c,WR_BPM__Conditions_Type__c 
+				from WR_BPM__Flow_Step_Connection__c
+				Where WR_BPM__Flow_Step_Source__r.WR_BPM__Guid__c =:stepGuid
+				and WR_BPM__Has_Conditions__c = true];
+
+System.debug('Printing step connection details before update');
+System.debug(JSON.SerializePretty(updateFlowStepConnection));
+
+String callApexConfig = '{\"params\":\"{\\n\\t\\\"Id\\\": \\\"{Change_Request__c.related_product_object_id__c}\\\",\\n\\t\\\"Field_Api_Name\\\": \\\"copy_instructions__c\\\", \\n        \\\"CallType\\\" : \\\"isCopyInstructionsBlank\\\"\\n}\",\"cls\":\"WorkFlowApexRuleHanlder\"}';
+System.debug(callApexConfig);
+
+updateFlowStepConnection.WR_BPM__Conditions__c = callApexConfig;
+updateFlowStepConnection.WR_BPM__Conditions_Type__c = 'Call Apex';
+update updateFlowStepConnection;
+
+System.debug('Printing step connection details after update');
+System.debug(JSON.SerializePretty(updateFlowStepConnection));
