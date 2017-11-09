@@ -973,6 +973,10 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
+                <field>Contract_Completion_Pause_Task__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
                 <field>Ads_Are_Approved__c</field>
             </layoutItems>
             <layoutItems>

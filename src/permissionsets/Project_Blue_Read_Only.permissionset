@@ -20,4 +20,9 @@
         <object>QA_Result__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
+	<fieldPermissions>
+        <editable>false</editable>
+        <field>Campaign_Profile__c.Contract_Completion_Pause_Task__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 </PermissionSet>
