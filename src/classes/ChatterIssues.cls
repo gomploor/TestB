@@ -62,7 +62,7 @@ public class ChatterIssues implements Queueable{
             
         cursorMap = new Map<Id, WR_BPM__Flow_Instance_Cursor__c>
                 ([Select Id, Name, WR_BPM__Flow_Instance__r.WR_BPM__Object_Id__c, WR_BPM__Flow_Instance__r.WR_BPM__Object_Type__c, WR_BPM__Flow_Instance__r.Campaign_Profile__c,
-                 WR_BPM__Step__r.Name, WR_BPM__Step__c, WR_BPM__Step_Assigned_To__c, WR_BPM__Status__c
+                 WR_BPM__Step__r.Name, WR_BPM__Step__c, WR_BPM__Step_Assigned_To__c
                  from WR_BPM__Flow_Instance_Cursor__c
                  where Id IN :curMap.keySet()]);
         
@@ -72,7 +72,28 @@ public class ChatterIssues implements Queueable{
             
         getMaps();
     }
-
+    
+    public ChatterIssues(List<WR_BPM__Flow_Instance_History__c> histList, List<WR_BPM__Flow_Instance_History__c> oldHistList){
+        baseUrl = URL.getSalesforceBaseUrl().toExternalForm(); 
+        Map<Id, WR_BPM__Flow_Instance_History__c> histMap = new Map<Id, WR_BPM__Flow_Instance_History__c>(histList); 
+        Map<Id, WR_BPM__Flow_Instance_History__c> oldHistMap;
+        
+        if(oldHistList != null)
+            oldHistMap = new Map<Id, WR_BPM__Flow_Instance_History__c>(oldHistList); 
+            
+        historyMap = new Map<Id, WR_BPM__Flow_Instance_History__c>
+                ([Select Id, Name, WR_BPM__Cursor__r.WR_BPM__Flow_Instance__r.WR_BPM__Object_Id__c, WR_BPM__Cursor__r.WR_BPM__Flow_Instance__r.WR_BPM__Object_Type__c, 
+                    WR_BPM__Cursor__r.WR_BPM__Flow_Instance__r.Campaign_Profile__c, WR_BPM__Step__r.Name, WR_BPM__Step__c, WR_BPM__Assigned_To__c, WR_BPM__Completed_Date__c
+                 from WR_BPM__Flow_Instance_History__c
+                 where Id IN :histMap.keySet()]);
+        
+        chatterPostList = new List<ChatterPostInfo>();
+        for(WR_BPM__Flow_Instance_History__c hist :histList)
+            chatterPostList.add(getInfo(historyMap.get(hist.Id), (oldHistMap != null ? oldHistMap.get(hist.Id) : null)));
+            
+        getMaps();
+    }
+    
     public void execute(QueueableContext context){
         
         if(chatterPostList != null &&  !chatterPostList.isEmpty()){
@@ -151,14 +172,32 @@ public class ChatterIssues implements Queueable{
         inf.objectId = (Id)cur.WR_BPM__Flow_Instance__r.WR_BPM__Object_Id__c;
         inf.cpId = cur.WR_BPM__Flow_Instance__r.Campaign_Profile__c;
         inf.Name = cur.WR_BPM__Step__r.Name;
-        inf.wrStatus = cur.WR_BPM__Status__c;
         inf.type = 'Task';
         inf.newRecord = true;
         inf.stepId = cur.WR_BPM__Step__c; 
         if(oldCur != null){
             inf.newRecord = false;
             inf.oldAssignedToId = getAssignedTo(oldCur.WR_BPM__Step_Assigned_To__c);
-            inf.oldWrStatus = oldCur.WR_BPM__Status__c;
+        }
+        return inf;
+    }
+    
+    private ChatterPostInfo getInfo(WR_BPM__Flow_Instance_History__c hist, WR_BPM__Flow_Instance_History__c oldHist){
+        
+        ChatterPostInfo inf = new ChatterPostInfo();
+        inf.recordId = hist.Id;
+        inf.assignedToId = getAssignedTo(hist.WR_BPM__Assigned_To__c);
+        inf.objectType = hist.WR_BPM__Cursor__r.WR_BPM__Flow_Instance__r.WR_BPM__Object_Type__c;
+        inf.objectId = (Id)hist.WR_BPM__Cursor__r.WR_BPM__Flow_Instance__r.WR_BPM__Object_Id__c;
+        inf.cpId = hist.WR_BPM__Cursor__r.WR_BPM__Flow_Instance__r.Campaign_Profile__c;
+        inf.Name = hist.WR_BPM__Step__r.Name;
+        inf.type = 'Task';
+        inf.newRecord = true;
+        inf.stepId = hist.WR_BPM__Step__c; 
+        inf.completedDate = hist.WR_BPM__Completed_Date__c.format();
+        if(oldHist != null){
+            inf.newRecord = false;
+            inf.oldAssignedToId = getAssignedTo(oldHist.WR_BPM__Assigned_To__c);
         }
         return inf;
     }
