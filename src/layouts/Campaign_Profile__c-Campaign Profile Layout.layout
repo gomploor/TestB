@@ -64,10 +64,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Lead_Forwarding_Email__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Facebook_Landing_Page_URL__c</field>
             </layoutItems>
             <layoutItems>

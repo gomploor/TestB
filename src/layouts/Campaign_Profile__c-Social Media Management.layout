@@ -134,10 +134,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Lead_Forwarding_Email__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Business_Website_Fulfillment_Reference__c</field>
             </layoutItems>
             <layoutItems>

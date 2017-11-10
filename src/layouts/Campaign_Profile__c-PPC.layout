@@ -121,7 +121,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Lead_Forwarding_Email__c</field>
+                <field>Lead_Capture_Email__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
