@@ -28,12 +28,12 @@
 		 To Deploy these metadatatype specify the object api name
 		 ActionOverride, HistoryRetentionPolicy, SearchLayouts, SharingRecalculation
 	-->
-	<!--
+	
 	<types>
-        <members>Project__c</members>
+        <members>QA_Results_Work_Relay_Forms__mdt</members>
         <name>CustomObject</name>
     </types>
-	-->
+	
 	<types>
         <members>Delegate_User__c</members>
         <name>CustomObject</name>

@@ -1,0 +1,21 @@
+<apex:page StandardController="QA_Result__c" extensions="QAResultsFormRenderer" tabstyle="WR_BPM__Form__c">
+    <apex:stylesheet value="{!URLFOR($Resource.WR_BPM__workrelay_resources, '/css/tab.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.WR_BPM__vs_lightning, 'vs_lightning.css')}" />
+    
+    <apex:includeScript value="/lightning/lightning.out.js" />
+    <apex:includeLightning />
+    
+    <apex:pageMessages escape="false" rendered="{!showError}"/>
+    <br/>  
+    
+    <apex:outputPanel rendered="{!NOT(ISNULL(workRelayFormId))}">
+        <apex:composition template="WR_BPM__Container">
+            <apex:define name="mini_header_container"></apex:define>
+            
+            <apex:define name="body">
+                <WR_BPM:FormRenderer recordId="{!QA_Result__c.Id}" formId="{!workRelayFormId}" retURL="{!$CurrentPage.parameters.retURL}" mode="view"/>
+            </apex:define>
+        </apex:composition>
+    </apex:outputPanel>
+    
+</apex:page>
