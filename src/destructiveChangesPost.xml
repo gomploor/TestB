@@ -22,6 +22,7 @@
 		<members>OnBoardFormModel__c.Email_Hosting_Desired_Email8__c</members>
 		<members>OnBoardFormModel__c.Email_Hosting_Desired_Email9__c</members>
 		<members>OnBoardFormModel__c.Email_Hosting_Desired_Email10__c</members>	
+		<members>User.Delegated_User__c</members>	
         <name>CustomField</name>
     </types>
 
