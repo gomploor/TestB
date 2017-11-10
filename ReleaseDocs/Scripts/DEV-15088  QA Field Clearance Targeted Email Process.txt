@@ -25,7 +25,6 @@ Step Name : Deployment to QA
 Desciption of change: 
 Adding QA Field Clearence Actions and updating url params
 */
-
 String sourceStepGuid = '00D2F0000008hofUAAc000d0614e8e0ca29022dd15a237571b';  
 Set<String> targetStepsGuid = new Set<String>();
 targetStepsGuid.add('00DA0000000HEOtMAOb575519f501c2e8bfd3a8bf969b655f1'); //Onboarding/Asset Collection
@@ -98,7 +97,7 @@ for(WR_BPM__Flow_Step_Action__c oneStepAction: lstStepActions){
 	}
 }
 if(stepActions2Insert.Size()>0){
-    //insert stepActions2Insert;
+    insert stepActions2Insert;
 	System.debug('Printing newly Inserted Actions');	
 	System.debug(JSON.SerializePretty(stepActions2Insert));	
 }else{
@@ -108,16 +107,17 @@ if(stepActions2Insert.Size()>0){
 //update targetSteps
 for(WR_BPM__Flow_Step_Junction__c oneStep: targetSteps){
  	Map<String, Object> UrlConfig = (Map<String, Object>)JSON.deserializeUntyped(oneStep.WR_BPM__Layout_URL_Params__c);
-    if(UrlConfig!=null){
-        for(String oneKey: UrlConfig.KeySet()){
-            if(oneKey!=null && oneKey.equalsIgnoreCase('redirectURL')){
-                System.debug(UrlConfig.get('redirectURL'));
-                //{"redirectURL":"{$System.ForceOrgUrl}/apex/WorkQueue"}
-                UrlConfig.put('redirectURL', '{$System.ForceOrgUrl}/apex/WorkQueue');
-                oneStep.WR_BPM__Layout_URL_Params__c = JSON.Serialize(UrlConfig); 
-            }
-        }
+    //{"redirectURL":"{$System.ForceOrgUrl}/apex/WorkQueue","qaid":"{$Variables.QA_Result_Id}"}
+    if(UrlConfig == null){
+    	UrlConfig = new Map<String, Object>();
+    }
+    if (UrlConfig.get('qaid')== null){
+       UrlConfig.put('qaid', '{$Variables.QA_Result_Id}');
+       oneStep.WR_BPM__Layout_URL_Params__c = JSON.Serialize(UrlConfig);   
     }
 }
+update targetSteps;
+System.debug('Printing updated Step Url Config');	
+System.debug(JSON.SerializePretty(targetSteps));	
 
 
