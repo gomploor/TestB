@@ -44,4 +44,14 @@
         <field>Delegate_User__c.User__c</field>
         <readable>true</readable>
     </fieldPermissions>
+	<fieldPermissions>
+        <editable>true</editable>
+        <field>Campaign_Profile__c.Action__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+	<fieldPermissions>
+        <editable>true</editable>
+        <field>Campaign_Profile__c.Strategy_Update_Details__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 </PermissionSet>

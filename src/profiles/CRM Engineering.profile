@@ -15,6 +15,16 @@
         <field>Campaign_Profile__c.Contract_Completion_Pause_Task__c</field>
         <readable>true</readable>
     </fieldPermissions>
+	<fieldPermissions>
+        <editable>true</editable>
+        <field>Campaign_Profile__c.Action__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+	<fieldPermissions>
+        <editable>true</editable>
+        <field>Campaign_Profile__c.Strategy_Update_Details__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <loginHours/>
     <userLicense>Salesforce</userLicense>
 </Profile>
