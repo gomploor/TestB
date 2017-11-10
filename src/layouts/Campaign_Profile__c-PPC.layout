@@ -321,10 +321,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Geographic_Targets__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Target_City__c</field>
             </layoutItems>
             <layoutItems>

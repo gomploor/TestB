@@ -155,10 +155,6 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Forwarding_Number__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Matchback_Report__c</field>
             </layoutItems>
             <layoutItems>
