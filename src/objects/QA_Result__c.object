@@ -162,6 +162,21 @@
         </valueSet>
     </fields>
     <fields>
+        <fullName>Campaign_Record_Type_Name__c</fullName>
+        <externalId>false</externalId>
+        <formula>IF(NOT(ISBLANK(Change_Request__c)),
+Change_Request__r.Campaign_Record_Type_Name__c, 
+IF(NOT(ISBLANK( Campaign_Profile__c )),
+Campaign_Profile__r.RecordType.Name , 
+&apos;&apos;) )</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Campaign Record Type Name</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>CountID_QA__c</fullName>
         <externalId>false</externalId>
         <label>Count ID QA</label>
