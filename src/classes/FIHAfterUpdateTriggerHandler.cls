@@ -15,6 +15,6 @@ public without sharing class FIHAfterUpdateTriggerHandler extends TriggerHandler
             if(hist.WR_BPM__Completed_Date__c != null && hist.WR_BPM__Completed_Date__c != oldHistoryMap.get(hist.Id).WR_BPM__Completed_Date__c){ updatedHist.add(hist); oldUpdatedHist.add(oldHistoryMap.get(hist.Id)); }
         }
         if(!updatedHist.isEmpty() && Test.isRunningTest() != true)
-            System.enqueueJob(new ChatterIssues(updatedHist, oldUpdatedHist));
+			 ChatterIssues ci = new ChatterIssues(updatedHist, oldUpdatedHist);
     }
 }

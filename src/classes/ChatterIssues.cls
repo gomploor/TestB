@@ -1,4 +1,4 @@
-public class ChatterIssues implements Queueable{
+public class ChatterIssues{
     
     public class ChatterPostInfo{
         public Id recordId {get;set;}
@@ -50,6 +50,7 @@ public class ChatterIssues implements Queueable{
             chatterPostList.add(getInfo(issueMap.get(issue.Id), (oldIssMap != null ? oldIssMap.get(issue.Id) : null)));
             
         getMaps();
+        postChatter();
     }
     
     public ChatterIssues(List<WR_BPM__Flow_Instance_Cursor__c> cursorList, List<WR_BPM__Flow_Instance_Cursor__c> oldCursorList){
@@ -71,6 +72,7 @@ public class ChatterIssues implements Queueable{
             chatterPostList.add(getInfo(cursorMap.get(cur.Id), (oldCurMap != null ? oldCurMap.get(cur.Id) : null)));
             
         getMaps();
+        postChatter();
     }
     
     public ChatterIssues(List<WR_BPM__Flow_Instance_History__c> histList, List<WR_BPM__Flow_Instance_History__c> oldHistList){
@@ -92,9 +94,10 @@ public class ChatterIssues implements Queueable{
             chatterPostList.add(getInfo(historyMap.get(hist.Id), (oldHistMap != null ? oldHistMap.get(hist.Id) : null)));
             
         getMaps();
+        postChatter();
     }
     
-    public void execute(QueueableContext context){
+    public void postChatter(){
         
         if(chatterPostList != null &&  !chatterPostList.isEmpty()){
            

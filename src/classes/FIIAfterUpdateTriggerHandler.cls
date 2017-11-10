@@ -22,6 +22,6 @@ public without sharing class FIIAfterUpdateTriggerHandler extends TriggerHandler
             }
         }
         if(!updatedIssues.isEmpty() && Test.isRunningTest() != true)
-            System.enqueueJob(new ChatterIssues(updatedIssues, oldUpdatedIssues));
+			ChatterIssues ci = new ChatterIssues(updatedIssues, oldUpdatedIssues);
     }
 }

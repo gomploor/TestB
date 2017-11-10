@@ -13,7 +13,7 @@ public without sharing class FIIAfterInsertTriggerHandler extends TriggerHandler
     public override void mainEntry(TriggerParameters tp){  
         
         if(Test.isRunningTest() != true)
-            System.enqueueJob(new ChatterIssues((List<WR_BPM__Flow_Instance_Issue__c>)tp.newList, null));
+			 ChatterIssues ci = new ChatterIssues((List<WR_BPM__Flow_Instance_Issue__c>)tp.newList, null);
         this.getCpMap((Map<Id, WR_BPM__Flow_Instance_Issue__c>)tp.newMap);
         this.createWorkRelayTasks((List<WR_BPM__Flow_Instance_Issue__c>)tp.newList);
     }

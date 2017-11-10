@@ -92,6 +92,6 @@ public without sharing class FICAfterUpdateTriggerHandler extends TriggerHandler
             }
         }
         if(!curList.isEmpty() && Test.isRunningTest() != true)
-            System.enqueueJob(new ChatterIssues(curList, oldCurList));
+             ChatterIssues ci = new ChatterIssues(curList, oldCurList);
     }
 }
