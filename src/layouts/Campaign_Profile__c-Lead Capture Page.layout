@@ -80,10 +80,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Interrupt_Build_Process__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Requested_Launch_Date__c</field>
             </layoutItems>
         </layoutColumns>

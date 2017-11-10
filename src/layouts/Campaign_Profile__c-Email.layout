@@ -100,10 +100,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Interrupt_Build_Process__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Strategy_Session__c</field>
             </layoutItems>
             <layoutItems>
