@@ -254,8 +254,8 @@
                 <emptySpace>true</emptySpace>
             </layoutItems>
             <layoutItems>
-                <behavior>Readonly</behavior>
-                <field>Facebook_URL__c</field>
+                <behavior>Edit</behavior>
+                <field>Facebook_Page_URL__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

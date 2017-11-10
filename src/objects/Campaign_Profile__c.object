@@ -68,6 +68,113 @@
         <type>LongTextArea</type>
         <visibleLines>3</visibleLines>
     </fields>
+	<fields>
+        <fullName>Design_Instructions__c</fullName>
+        <description>This is used to enter the design instructions for the campaign profile.</description>
+        <externalId>false</externalId>
+        <label>Design Instructions</label>
+        <length>3000</length>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>3</visibleLines>
+    </fields>
+    <fields>
+        <fullName>Facebook_Page_URL__c</fullName>
+        <externalId>false</externalId>
+        <label>Facebook Page URL</label>
+        <length>255</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Lead_Capture_Email__c</fullName>
+        <externalId>false</externalId>
+        <label>Lead Capture Email</label>
+        <length>500</length>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>2</visibleLines>
+    </fields>
+    <fields>
+        <fullName>Social_Voice__c</fullName>
+        <externalId>false</externalId>
+        <label>Social Voice</label>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+        <valueSet>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>Brand Based</fullName>
+                    <default>false</default>
+                    <label>Brand Based</label>
+                </value>
+                <value>
+                    <fullName>Casual</fullName>
+                    <default>false</default>
+                    <label>Casual</label>
+                </value>
+                <value>
+                    <fullName>Fun</fullName>
+                    <default>false</default>
+                    <label>Fun</label>
+                </value>
+                <value>
+                    <fullName>Informational</fullName>
+                    <default>false</default>
+                    <label>Informational</label>
+                </value>
+                <value>
+                    <fullName>Professional</fullName>
+                    <default>false</default>
+                    <label>Professional</label>
+                </value>
+                <value>
+                    <fullName>Helpful</fullName>
+                    <default>false</default>
+                    <label>Helpful</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
+    </fields>
+    <fields>
+        <fullName>Targeted_Gender__c</fullName>
+        <externalId>false</externalId>
+        <label>Targeted Gender</label>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>MultiselectPicklist</type>
+        <valueSet>
+            <restricted>true</restricted>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>Male</fullName>
+                    <default>false</default>
+                    <label>Male</label>
+                </value>
+                <value>
+                    <fullName>Female</fullName>
+                    <default>false</default>
+                    <label>Female</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
+        <visibleLines>4</visibleLines>
+    </fields>
     <recordTypes>
         <fullName>History</fullName>
         <active>true</active>
@@ -88,6 +195,44 @@
             <picklist>Contract_Completion_Pause_Task__c</picklist>
             <values>
                 <fullName>Submitted</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+		<picklistValues>
+            <picklist>Social_Voice__c</picklist>
+            <values>
+                <fullName>Brand Based</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Casual</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Fun</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Helpful</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Informational</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Professional</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+        <picklistValues>
+            <picklist>Targeted_Gender__c</picklist>
+            <values>
+                <fullName>Female</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Male</fullName>
                 <default>false</default>
             </values>
         </picklistValues>
@@ -112,6 +257,94 @@
             <picklist>Contract_Completion_Pause_Task__c</picklist>
             <values>
                 <fullName>Submitted</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+    </recordTypes>
+	<recordTypes>
+        <fullName>Social_Ads</fullName>
+        <active>true</active>
+        <description>Social Ads record type for Campaign Profile</description>
+        <label>Social Ads</label>
+        <picklistValues>
+            <picklist>Social_Voice__c</picklist>
+            <values>
+                <fullName>Brand Based</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Casual</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Fun</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Helpful</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Informational</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Professional</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+        <picklistValues>
+            <picklist>Targeted_Gender__c</picklist>
+            <values>
+                <fullName>Female</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Male</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+    </recordTypes>
+    <recordTypes>
+        <fullName>Social_Media_Management</fullName>
+        <active>true</active>
+        <description>Social Media Management record type for Campaign Profile</description>
+        <label>Social Media Management</label>
+        <picklistValues>
+            <picklist>Social_Voice__c</picklist>
+            <values>
+                <fullName>Brand Based</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Casual</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Fun</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Helpful</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Informational</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Professional</fullName>
+                <default>false</default>
+            </values>
+        </picklistValues>
+        <picklistValues>
+            <picklist>Targeted_Gender__c</picklist>
+            <values>
+                <fullName>Female</fullName>
+                <default>false</default>
+            </values>
+            <values>
+                <fullName>Male</fullName>
                 <default>false</default>
             </values>
         </picklistValues>

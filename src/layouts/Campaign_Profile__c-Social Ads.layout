@@ -271,15 +271,11 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Facebook_Targeting_Demographics_Age__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Age_Range__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Facebook_Targeting_Demographics_Gender__c</field>
+                <field>Targeted_Gender__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
@@ -520,7 +516,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Copy_Theme_Ideas__c</field>
+                <field>Social_Voice__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

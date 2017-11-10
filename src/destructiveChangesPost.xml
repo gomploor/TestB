@@ -2,6 +2,18 @@
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
    <fullName>Post delete</fullName>
 	<types>
+	    <members>Campaign_Profile__c.Forwarding_Number__c</members>
+		<members>Campaign_Profile__c.Tracking_Number__c</members>
+		<members>Campaign_Profile__c.PPC_Destination_URL_Type__c</members>
+		<members>Campaign_Profile__c.Geographic_Targets__c</members>
+		<members>Campaign_Profile__c.Facebook_URL__c</members>
+		<members>Campaign_Profile__c.Gender__c</members>
+		<members>Campaign_Profile__c.Facebook_Targeting_Demographics_Gender__c</members>
+		<members>Campaign_Profile__c.Facebook_Targeting_Demographics_Age__c</members>
+		<members>Campaign_Profile__c.Facebook_Targeting_Interest_Behavior__c</members>
+		<members>Campaign_Profile__c.FBLP_Design_Instructions__c</members>
+		<members>Campaign_Profile__c.Copy_Themes_Ideas__c</members>
+		<members>Campaign_Profile__c.Lead_Forwarding_Email__c</members>
 		<members>Marketing_Campaign__c.PPC_Destination_URL_Domain__c</members>
 		<members>Marketing_Campaign__c.PPC_Destination_URL_Domain_Type__c</members>
         <members>OnBoardFormModel__c.Email_Hosting_sel__c</members>

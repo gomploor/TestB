@@ -34,6 +34,11 @@
         <field>Campaign_Profile__c.Contract_Completion_Pause_Task__c</field>
         <readable>true</readable>
     </fieldPermissions>
+	<fieldPermissions>
+        <editable>false</editable>
+        <field>Campaign_Profile__c.Targeted_Gender__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 	 <fieldPermissions>
         <editable>false</editable>
         <field>Delegate_User__c.User_Delegate__c</field>
@@ -52,6 +57,16 @@
 	<fieldPermissions>
         <editable>false</editable>
         <field>Campaign_Profile__c.Strategy_Update_Details__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+	<fieldPermissions>
+        <editable>false</editable>
+        <field>PPC_Product__c.Design_Instructions__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>PPC_Product__c.Lead_Capture_Email__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -177,6 +192,51 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>QA_Result__c.iPhoney_QA__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+	<fieldPermissions>
+        <editable>false</editable>
+        <field>SMM_Product__c.Design_Instructions__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>SMM_Product__c.Facebook_Page_URL__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>SMM_Product__c.Lead_Capture_Email__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>SMM_Product__c.Social_Voice__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>SMM_Product__c.Targeted_Gender__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Social_Ads_Product__c.Design_Instructions__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Social_Ads_Product__c.Facebook_Page_URL__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Social_Ads_Product__c.Lead_Capture_Email__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Social_Ads_Product__c.Targeted_Gender__c</field>
         <readable>true</readable>
     </fieldPermissions>
 	<tabSettings>

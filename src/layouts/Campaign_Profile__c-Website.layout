@@ -164,10 +164,6 @@
                 <field>Campaign_AM_Actions__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Readonly</behavior>
-                <field>Facebook_URL__c</field>
-            </layoutItems>
-            <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Forwarding_Number__c</field>
             </layoutItems>
@@ -294,15 +290,15 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Facebook_Targeting_Demographics_Age__c</field>
+                <field>Age_Range__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Facebook_Targeting_Demographics_Gender__c</field>
+                <field>Targeted_Gender__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Facebook_Targeting_Interest_Behavior__c</field>
+                <field>Interests_and_Behaviors__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
@@ -452,7 +448,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Copy_Theme_Ideas__c</field>
+                <field>Social_Voice__c</field>
             </layoutItems>
             <layoutItems>
                 <emptySpace>true</emptySpace>

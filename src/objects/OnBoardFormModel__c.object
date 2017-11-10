@@ -103,4 +103,48 @@ Website_Quote_Cost_Custom__c</formula>
         <trackTrending>false</trackTrending>
         <type>Currency</type>
     </fields>
+	<fields>
+        <fullName>Copy_Theme_Ideas__c</fullName>
+        <externalId>false</externalId>
+        <label>Social Voice</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+        <valueSet>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>Fun</fullName>
+                    <default>false</default>
+                    <label>Fun</label>
+                </value>
+                <value>
+                    <fullName>Professional</fullName>
+                    <default>false</default>
+                    <label>Professional</label>
+                </value>
+                <value>
+                    <fullName>Helpful</fullName>
+                    <default>false</default>
+                    <label>Helpful</label>
+                </value>
+                <value>
+                    <fullName>Casual</fullName>
+                    <default>false</default>
+                    <label>Casual</label>
+                </value>
+                <value>
+                    <fullName>Brand Based</fullName>
+                    <default>false</default>
+                    <label>Brand Based</label>
+                </value>
+                <value>
+                    <fullName>Informational</fullName>
+                    <default>false</default>
+                    <label>Informational</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
+    </fields>
 </CustomObject>
