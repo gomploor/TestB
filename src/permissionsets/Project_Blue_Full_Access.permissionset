@@ -54,4 +54,8 @@
         <field>Campaign_Profile__c.Strategy_Update_Details__c</field>
         <readable>true</readable>
     </fieldPermissions>
+	<tabSettings>
+        <tab>Delegate_User__c</tab>
+        <visibility>Available</visibility>
+    </tabSettings>
 </PermissionSet>
