@@ -84,6 +84,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>QA_Result__c.Campaign_Record_Type_Name__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>QA_Result__c.CountID_QA__c</field>
         <readable>true</readable>
