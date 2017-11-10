@@ -47,7 +47,8 @@ Set<String> removeKeys = new Set<String>{
 											'CreatedById',
 											'CreatedDate',
 											'Id',
-											'LastModifiedById'
+											'LastModifiedById',
+											'WR_BPM__Flow_Step_Connection__c'
 										};
 Map<String,Id> mapUniqueStepActions = new Map<String,Id>();
 //Get Unique Action Name 
@@ -93,6 +94,9 @@ for(WR_BPM__Flow_Step_Action__c oneStepAction: lstStepActions){
 		//Cloning the above Account Record ac
 		WR_BPM__Flow_Step_Action__c clonedAction  = stepAction.clone(false, false, false, false);
 		clonedAction.WR_BPM__Flow_Step__c = oneStep.Id; 
+		if(clonedAction.WR_BPM__Conditions_Object_Type__c.equalsIgnoreCase('change_request__c')){
+		   clonedAction.WR_BPM__Conditions_Object_Type__c = 'campaign_profile__c';
+		} 
 		stepActions2Insert.add(clonedAction);
 	}
 }
