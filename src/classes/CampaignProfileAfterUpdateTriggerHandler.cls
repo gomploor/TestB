@@ -11,7 +11,6 @@ public class CampaignProfileAfterUpdateTriggerHandler extends TriggerHandlerBase
     
     public override void mainEntry(TriggerParameters tp) {  
         this.updateCursorAssigneesBasedOnFieldUpdate((Map<Id, Campaign_Profile__c>)tp.oldMap, (Map<Id, Campaign_Profile__c>)tp.newMap);
-        this.createChildCampaignProfile((Map<Id, Campaign_Profile__c>)tp.oldMap, (Map<Id, Campaign_Profile__c>)tp.newMap);
         this.createCampaignProfileHistory((Map<Id, Campaign_Profile__c>)tp.oldMap, (Map<Id, Campaign_Profile__c>)tp.newMap);
     }    
       
@@ -86,54 +85,7 @@ public class CampaignProfileAfterUpdateTriggerHandler extends TriggerHandlerBase
 
     }
 
-    //DEV-11523 create Post-Live Maintenance Campaigns (maintenance tickets)
-    private void createChildCampaignProfile(Map<Id, Campaign_Profile__c> oldCPmap, Map<Id, Campaign_Profile__c> newCPmap) {
-      
-      for(Campaign_Profile__c newCP : newCPmap.values()){
-         //exclude history records and when Campaign_Profile_Strikes_Back__c is updated
-         //Campaign_Profile_Strikes_Back__c only gets updated one time right after Campaign_Profile__c created
-        if(newCP.RecordTypeId != CampaignProfileTriggerDispatcher.History_Record_Type_Id && 
-          (newCP.Campaign_Profile_Strikes_Back__c == oldCPmap.get(newCP.Id).Campaign_Profile_Strikes_Back__c || Test.isRunningTest())){    
-                
-                Campaign_Profile__c oldCP = oldCPmap.get(newCP.Id); 
-                /*Create Maintenance Campaign: If the Post Live Maintenance checkbox was checked on the original Campaign Profile (Parent),
-                 * Then create a new maintenance campaign. 
-                 */ 
-                if(oldCP.Post_Live_Maintenance__c == false && newCP.Post_Live_Maintenance__c && newCP.Parent_Campaign__c == null){
-                      
-                      //Create the new Campaign Profile Maintenance values and assign it values
-                      Campaign_Profile__c newCampaignMaintenance = new Campaign_Profile__c();
-                      
-                      List<String> roleAssignmentFields = CampaignProfileCache.getRole2CPfieldMap().values();
-                      
-                      //Probably do not need to sync these fields except for Campaign_Type__c.  Probably only need to sync roleAssignmentFields
-                      Set<String> fieldsToSync = new Set<String>{'Client_Name__c','Opportunity_Product_ID__c','Account_Tier__c',
-                                                          'Account_Primary_Industry__c','Campaign_Type__c','Post_Live_Maintenance__c',
-                                                          'Facebook_Page_URL__c', 'Current_Product_Value__c', 'OLI_Duration__c', 'ProductName__c','PPC_Destination_URL__c', 'OLI_ID__c', 'Related_OLI__c'}; //DEV-13090, added PPC_Destination_URL__c
-                                                              
-                      Boolean fieldsToSyncUpdated = fieldsToSync.addAll(roleAssignmentFields);                                                  
-                      
-                      //Give maintenance ticket an initial name.  Name will be redefined in maintenance process.   
-                      String cpName = newCP.Campaign_Profile_Name__c + ' - Maintenance';
-                      newCampaignMaintenance.Campaign_Profile_Name__c = StringFormatter.autoTruncate(cpName);
-        
-                      //As per AC of DEV-11523, Record Type is the same as parent, but this will change in new story.  
-                      //Update parameter in getRecordType to change to appropriate Record Type. 
-                      newCampaignMaintenance.RecordTypeId = CampaignProfileCache.getRecordType(newCP.Campaign_Type__c).Id;
-                      newCampaignMaintenance.Parent_Campaign__c = newCP.Id;
-                      for(String field : fieldsToSync){
-                          newCampaignMaintenance.put(field, newCP.get(field));
-                      }
-                      sObjectsToInsert.add((sObject)newCampaignMaintenance);
-                      
-                      //Need to update parent campaign to have Post_Live_Maintenance__c checkbox equal to false.
-                      Campaign_Profile__c updateParentCP = (Campaign_Profile__c)this.getReferenceToSobjectsToUpdateRecord(newCP.Id);
-                      updateParentCP.Post_Live_Maintenance__c = false;
-                }
-        }
-      }
-    }
-    
+
     private void createCampaignProfileHistory(Map<Id, Campaign_Profile__c> oldCPmap, Map<Id, Campaign_Profile__c> newCPmap) {
         
         String gl = 'gl';

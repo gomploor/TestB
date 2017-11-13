@@ -68,6 +68,22 @@
                     </apex:actionStatus>
                     <!-- END NEW ISSUES BUTTON --> 
 
+                    <!-- DEV-15064 NEW ISSUES BUTTON -->
+                    <apex:actionStatus id="RecurringMaintenanceStatus">
+                        <apex:facet name="start">
+                             <apex:image value="{!URLFOR($Resource.spinner)}" width="40" height="10"/>
+                        </apex:facet>    
+                        <apex:facet name="stop">
+                            <apex:commandLink action="{!recurMaint}" status="RecurringMaintenanceStatus"
+                                value="Monthly Maintenance" styleClass="slds-button slds-button--neutral" 
+                                type="button" rendered="{!renderRecurringMaintenance}">
+                            </apex:commandLink>
+                        </apex:facet>
+                    </apex:actionStatus>
+                    <apex:commandButton value="Monthly Maintenance" styleClass="slds-button slds-button--neutral" 
+                        rendered="{!NOT(renderRecurringMaintenance)}" disabled="true">
+                    </apex:commandButton>
+                    <!-- END Monthly Maintenance --> 
                 </div>
             </apex:outputPanel>
             <apex:outputPanel id="redirectToWorkRelayForm" >

@@ -19,21 +19,41 @@ public without sharing class CPButtonsExt {
     public Map<String, Product_SLA_Status__mdt> statusMap;
     public OpportunityLineItem oli; 
     public Boolean renderChangeRequest {get;set;}
+    public Boolean renderRecurringMaintenance {get;set;}
+    public User loggedInUser {get; set;}
+    public string fields2query;
+    public Set<String> fieldSet;
+    private static final String MAINTENANCE_REQUEST = 'Maintenance';
+    private static final String RECURRING_MAINTENANCE_REQUEST = 'Recurring Maintenance';
+
     public CPButtonsExt(ApexPages.StandardController stdController){
         recordId = stdController.getId();
         this.stdController = stdController;
+        String controllerName = String.valueOf(this).substring(0,String.valueOf(this).indexOf(':')); 
+        getCPfields2query();
         getStatusMap();
-        cp = [Select Id, Name, Begin_Build_Process__c, Post_Live_Maintenance__c, Opportunity_Product_ID__c, RecordTypeId,
-                RecordType.DeveloperName, RecordType.Name, Strategy_Session__c, Campaign_Type__c, AM__c, PM__c, PPC_Specialist__c,
-                Campaign_Profile_Strikes_Back__c
-                from Campaign_Profile__c
-                where Id = :recordId];
+        String query = 'SELECT Id,'+fields2query+',Name '+
+                       'FROM Campaign_Profile__c '+
+                       'WHERE ID = :recordId';
+
+        List<sObject> campaignProfiles = Database.query(query);               
+        cp = (Campaign_Profile__c) campaignProfiles[0];
         if(cp.Opportunity_Product_ID__c != null)
             oli = [select Id, Waiting_Status__c, Live_Date__c
                    from OpportunityLineItem
                    where Id = :cp.Opportunity_Product_ID__c];
+                   
+        if (loggedInUser == null){
+            loggedInUser = [Select Id, Profile.Name, CommunityNickname from User Where Id =: Userinfo.getUserId()];
+        }
         
         getRenderMaint();
+
+        renderRecurringMaintenance = false;
+        if(renderMaint == true && !VfPageFieldAccess.disableFieldAccess(controllerName,'renderRecurringMaintenance',loggedInUser.Profile.Name,loggedInUser.CommunityNickname,cp.RecordType.DeveloperName)){
+            renderRecurringMaintenance = true;
+        }
+
           /* Set renderChangeRequest flag */
         renderChangeRequest=false;
         if (renderBegin == false && renderMaint == false){
@@ -94,9 +114,8 @@ public without sharing class CPButtonsExt {
                 shouldRedirect=true; 
                 return null;
             }else{
-                cp.Post_Live_Maintenance__c = true;
                 renderMaint = false;
-                update cp;
+                insert createMaintenanceCP(MAINTENANCE_REQUEST);
             }
             
         } catch (Exception e){
@@ -105,6 +124,43 @@ public without sharing class CPButtonsExt {
         }
         return null;
 
+     }
+
+    public PageReference recurMaint(){
+        try{
+            renderRecurringMaintenance = false;
+            insert createMaintenanceCP(RECURRING_MAINTENANCE_REQUEST);
+        } catch (Exception e){
+            renderError = true;
+            errorText = 'Unable to start Post-Live Maintenance. Please populate all required information.';
+        }
+        return null;
+     }
+
+     private Campaign_Profile__c createMaintenanceCP(String requestType){
+        
+        Campaign_Profile__c maintenanceCP = new Campaign_Profile__c();
+        maintenanceCP.Parent_Campaign__c = cp.Id;
+        String cpName = cp.Campaign_Profile_Name__c + ' - ' +requestType;
+        maintenanceCP.Campaign_Profile_Name__c = StringFormatter.autoTruncate(cpName);
+        maintenanceCP.Processes_To_Run__c = requestType;
+        Set<String> fieldsToSync = new Set<String>(fieldSet);
+        Set<String> removeKeys = new Set<String>{
+            'RecordType.DeveloperName', 'RecordType.Name','Begin_Build_Process__c','Post_Live_Maintenance__c','Campaign_Profile_Strikes_Back__c','Strategy_Session__c',
+            'Campaign_Profile_Name__c'
+        };
+        //Removing query fields from campaign profile
+        for(String oneKey: removeKeys){
+           fieldsToSync.remove(oneKey);
+        }
+        //Inherit field values from parent campaign profile
+        for(String field : fieldsToSync){
+            maintenanceCP.put(field, cp.get(field));
+        }
+        if(requestType == MAINTENANCE_REQUEST) {
+            maintenanceCP.Post_Live_Maintenance__c = true;
+        }
+        return maintenanceCP;
      }  
      
      private void getRenderMaint(){
@@ -165,5 +221,20 @@ public without sharing class CPButtonsExt {
         }
         
     }
+
+    private void getCPfields2query(){
+        List<String> roleAssignmentFields = CampaignProfileCache.getRole2CPfieldMap().values();
+        fieldSet = new Set<String>{
+                'Begin_Build_Process__c', 'Post_Live_Maintenance__c', 'Opportunity_Product_ID__c', 'RecordTypeId',
+                'RecordType.DeveloperName', 'RecordType.Name', 'Strategy_Session__c', 'Campaign_Type__c',
+                'Campaign_Profile_Strikes_Back__c','Campaign_Profile_Name__c','Client_Name__c','Account_Tier__c',
+                'Account_Primary_Industry__c','Facebook_Page_URL__c', 'Current_Product_Value__c', 'OLI_Duration__c', 
+                'ProductName__c','PPC_Destination_URL__c', 'OLI_ID__c', 'Related_OLI__c'
+        };
+        fieldSet.addAll(roleAssignmentFields); 
+        fields2query = String.Join(new List<String>(fieldSet), ',');
+    }
+
+
 
 }

@@ -1,7 +1,8 @@
 //DEV-11918 - Creates recurring maintenance campaign every 30 days after campaign goes live
 global class RecurringMaintenanceCampaign implements Database.Batchable<sobject> {
-    
-    ID History_Record_Type_Id = RecordTypeCache.getRecordType('Campaign_Profile__c', Constants.HISTORY_RECORD_TYPE_NAME).Id;
+    String BRANDBUILDING = 'Brand_Building';
+    ID History_Record_Type_Id     = RecordTypeCache.getRecordType('Campaign_Profile__c', Constants.HISTORY_RECORD_TYPE_NAME).Id;
+    ID BrandBuilding_RecordTypeId = RecordTypeCache.getRecordType('Campaign_Profile__c', BRANDBUILDING).Id;
     List<String> roleAssignmentFields = CampaignProfileCache.getRole2CPfieldMap().values();
     
     //Probably do not need to sync these fields except for Campaign_Type__c.  Probably only need to sync roleAssignmentFields
@@ -26,8 +27,10 @@ global class RecurringMaintenanceCampaign implements Database.Batchable<sobject>
     global Database.QueryLocator start(Database.BatchableContext BC){
         //select all Campaign Profiles that qualify for having a recurring maintnenance and are not history records
         date qualifyDate = date.today();
-        query = 'SELECT Id,Campaign_Profile_Name__c,' + fields2query + 'Recurring_Maintenance_Date__c from Campaign_Profile__c '+ 
-            	'WHERE RecordTypeId != :History_Record_Type_Id AND Recurring_Maintenance_Date__c = '+String.valueOf(qualifyDate);    
+        query = 'SELECT Id,Campaign_Profile_Name__c,' + fields2query + 'Recurring_Maintenance_Date__c '+ 
+                'from Campaign_Profile__c '+ 
+            	'WHERE (RecordTypeId != :History_Record_Type_Id OR RecordTypeId != :BrandBuilding_RecordTypeId) '+
+                'AND Recurring_Maintenance_Date__c = '+String.valueOf(qualifyDate);    
         return Database.getQueryLocator(query);
     }
     
