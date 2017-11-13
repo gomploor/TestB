@@ -196,8 +196,9 @@ public class ChatterIssues{
         inf.Name = hist.WR_BPM__Step__r.Name;
         inf.type = 'Task';
         inf.newRecord = true;
-        inf.stepId = hist.WR_BPM__Step__c; 
-        inf.completedDate = hist.WR_BPM__Completed_Date__c.format();
+        inf.stepId = hist.WR_BPM__Step__c;
+        if(hist.WR_BPM__Completed_Date__c != null)
+            inf.completedDate = hist.WR_BPM__Completed_Date__c.format();
         if(oldHist != null){
             inf.newRecord = false;
             inf.oldAssignedToId = getAssignedTo(oldHist.WR_BPM__Assigned_To__c);

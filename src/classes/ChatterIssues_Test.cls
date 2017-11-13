@@ -60,15 +60,14 @@ public class ChatterIssues_Test {
 	    insert issueList;
 	    
 	    Test.startTest();        
-        System.enqueueJob(new ChatterIssues(issueList, null));
+        ChatterIssues ci1 = new ChatterIssues(issueList, null);
 	    for(WR_BPM__Flow_Instance_Issue__c iss :issueList)
 	        iss.WR_BPM__Status__c = 'Completed';
 	    update issueList;
-
-        System.enqueueJob(new ChatterIssues(issueList, issueList));
+	    ChatterIssues ci2 = new ChatterIssues(issueList, issueList);
 	    
 	    List<WR_BPM__Flow_Instance_Cursor__c> cursorList = new List<WR_BPM__Flow_Instance_Cursor__c>();
-	    List<WR_BPM__Flow_Instance_History__c> histList = new List<WR_BPM__Flow_Instance_History__c>();
+	    
 	    for (Integer i=0; i<25; i++){
 	        WR_BPM__Flow_Instance_Cursor__c cursor = new WR_BPM__Flow_Instance_Cursor__c
 	         (WR_BPM__Flow_Instance__c = flowInst.Id, WR_BPM__Step__c = step.Id, WR_BPM__Status__c = 'In Progress',
@@ -83,8 +82,12 @@ public class ChatterIssues_Test {
 	        cur.WR_BPM__Step_Assigned_To__c = usr.Id;
 	        update newCurList;
 	    }
+
+	    ChatterIssues ci3 = new ChatterIssues(newCurList, cursorList);
 	    
-	    System.enqueueJob(new ChatterIssues(newCurList, cursorList));
+	    List<WR_BPM__Flow_Instance_History__c> histList = [Select Id from WR_BPM__Flow_Instance_History__c limit 5];
+	    ChatterIssues ci4 = new ChatterIssues(histList, null);
+	    
         Test.stopTest();
 	    
 	}    
