@@ -1,0 +1,85 @@
+<apex:page StandardController="Campaign_Profile__c" extensions="CPButtonsExt" sidebar="false" showHeader="false">
+     <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<head>
+  		<apex:slds /> 
+	</head>
+    
+	<body class="slds-scope">
+        <apex:form >
+            <apex:outputPanel id="buttons">
+                 
+                <apex:outputText value="{!errorText}" rendered="{!renderError}" style="color:red"/>
+                <div class="slds-p-horizontal--small slds-m-top--medium slds-size--1-of-1 slds-align--absolute-center" >
+                    <apex:actionStatus id="BegStatus">
+                        <apex:facet name="start">
+                             <apex:image value="{!URLFOR($Resource.spinner)}" width="40" height="10"/>
+                        </apex:facet>    
+                        <apex:facet name="stop">
+                            <apex:commandLink action="{!beginProcess}" status="BegStatus"
+                                value="Begin Build" styleClass="slds-button slds-button--neutral" rerender="buttons" 
+                                type="button" rendered="{!renderBegin}">
+                            </apex:commandLink>  
+                        </apex:facet>
+                    </apex:actionStatus>
+                    <apex:commandButton value="Begin Build" styleClass="slds-button slds-button--neutral" 
+                        rendered="{!NOT(renderBegin)}" disabled="true">
+                    </apex:commandButton>
+                    <apex:actionStatus id="PostMaint">
+                        <apex:facet name="start">
+                             <apex:image value="{!URLFOR($Resource.spinner)}" width="40" height="10"/>
+                        </apex:facet> 
+                        <apex:facet name="stop">
+                            <apex:commandLink action="{!postLiveMaint}" status="PostMaint"
+                                value="Post-Live Maintenance" styleClass="slds-button slds-button--neutral" rerender="buttons, redirectToWorkRelayForm"  
+                                type="button" rendered="{!renderMaint}">
+                            </apex:commandLink> 
+                        </apex:facet>
+                    </apex:actionStatus>
+                    <apex:commandButton value="Post-Live Maintenance" styleClass="slds-button slds-button--neutral" 
+                        rendered="{!NOT(renderMaint)}" disabled="true">
+                    </apex:commandButton>
+                    
+                    <apex:actionStatus id="changeRequestStatus">
+                        <apex:facet name="start">
+                             <apex:image value="{!URLFOR($Resource.spinner)}" width="40" height="10"/>
+                        </apex:facet>    
+                        <apex:facet name="stop">
+                            <apex:commandLink action="{!invokeChangeRequest}" status="changeRequestStatus"
+                                value="Change Request" styleClass="slds-button slds-button--neutral" rerender="buttons,redirectToWorkRelayForm"  
+                                type="button" rendered="{!renderChangeRequest}">
+                            </apex:commandLink>
+                        </apex:facet>
+                    </apex:actionStatus>
+                    <apex:commandButton value="Change Request" styleClass="slds-button slds-button--neutral" 
+                        rendered="{!NOT(renderChangeRequest)}" disabled="true">
+                    </apex:commandButton>
+
+                    <!-- DEV-12943 NEW ISSUES BUTTON -->
+                    <apex:actionStatus id="issuesStatus">
+                        <apex:facet name="start">
+                             <apex:image value="{!URLFOR($Resource.spinner)}" width="40" height="10"/>
+                        </apex:facet>    
+                        <apex:facet name="stop">
+                            <apex:commandLink action="{!newIssue}" status="issueStatus"
+                                value="New Issue" styleClass="slds-button slds-button--neutral" 
+                                type="button" rendered="true">
+                            </apex:commandLink>
+                        </apex:facet>
+                    </apex:actionStatus>
+                    <!-- END NEW ISSUES BUTTON --> 
+
+                </div>
+            </apex:outputPanel>
+            <apex:outputPanel id="redirectToWorkRelayForm" >
+                <apex:outputText rendered="{!shouldRedirect}"> 
+                    <script>
+                        console.log('redirect to home page');
+                        console.log('{!redirectUrl}');
+                        window.top.location="{!redirectUrl}";
+                   </script>
+                </apex:outputText>
+            </apex:outputPanel>
+        </apex:form>
+    </body>
+    </html>
+</apex:page>
