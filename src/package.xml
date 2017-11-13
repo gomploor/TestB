@@ -168,10 +168,7 @@
         <name>WebLink</name>
     </types>
     <types>
-        <members>OpportunityLineItem.OLI Expiration Email Notification%3A Website Products</members>
-        <members>OpportunityLineItem.OLI Expiration Email Notification%3A Website Products %28Expired 30 Days Ago%29</members>
-        <members>OpportunityLineItem.OLI Expiration Email Notification%3A Website Products %28Expiring Today%29</members>
-        <members>OpportunityLineItem.OLI Expiration Email Notification%3A Website Products %28Expiring in 7 Days%29</members>
+        <members>*</members>
         <name>Workflow</name>
     </types>
     <types>

@@ -1,5 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <alerts>
+        <fullName>OLI_Expired_30_Days_Ago</fullName>
+        <description>OLI Expired 30 Days Ago</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Affl_Sales_Rep__c</field>
+            <type>contactLookup</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_1__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_2__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_3__c</field>
+            <type>email</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>Opportunity_Product_Templates/OLI_Expiration_Reminder_Expired_30_Days_Ago</template>
+    </alerts>
+    <alerts>
+        <fullName>OLI_Expires_Today</fullName>
+        <description>OLI Expires Today</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Affl_Sales_Rep__c</field>
+            <type>contactLookup</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_1__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_2__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_3__c</field>
+            <type>email</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>Opportunity_Product_Templates/OLI_Expiration_Reminder_Expiring_Today</template>
+    </alerts>
+    <alerts>
+        <fullName>OLI_Expires_in_30_Days</fullName>
+        <description>OLI Expires in 30 Days</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Affl_Sales_Rep__c</field>
+            <type>contactLookup</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_1__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_2__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_3__c</field>
+            <type>email</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>Opportunity_Product_Templates/OLI_Expiration_Reminder_Expiring_Within_30_Days</template>
+    </alerts>
+    <alerts>
+        <fullName>OLI_Expires_in_7_Days</fullName>
+        <description>OLI Expires in 7 Days</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Affl_Sales_Rep__c</field>
+            <type>contactLookup</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_1__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_2__c</field>
+            <type>email</type>
+        </recipients>
+        <recipients>
+            <field>Notify_Email_3__c</field>
+            <type>email</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>Opportunity_Product_Templates/OLI_Expiration_Reminder_Expiring_Within_7_Days</template>
+    </alerts>
     <rules>
         <fullName>OLI Expiration Email Notification%3A Website Products</fullName>
         <active>true</active>
