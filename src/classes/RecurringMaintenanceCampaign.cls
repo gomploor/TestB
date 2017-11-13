@@ -30,6 +30,7 @@ global class RecurringMaintenanceCampaign implements Database.Batchable<sobject>
         query = 'SELECT Id,Campaign_Profile_Name__c,' + fields2query + 'Recurring_Maintenance_Date__c '+ 
                 'from Campaign_Profile__c '+ 
             	'WHERE (RecordTypeId != :History_Record_Type_Id OR RecordTypeId != :BrandBuilding_RecordTypeId) '+
+                'AND Parent_Campaign__c = null '+
                 'AND Recurring_Maintenance_Date__c = '+String.valueOf(qualifyDate);    
         return Database.getQueryLocator(query);
     }

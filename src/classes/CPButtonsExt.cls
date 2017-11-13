@@ -30,7 +30,7 @@ public without sharing class CPButtonsExt {
         recordId = stdController.getId();
         this.stdController = stdController;
         String controllerName = String.valueOf(this).substring(0,String.valueOf(this).indexOf(':')); 
-        getCPfields2query();
+        populateCPfields2query();
         getStatusMap();
         String query = 'SELECT Id,'+fields2query+',Name '+
                        'FROM Campaign_Profile__c '+
@@ -143,7 +143,9 @@ public without sharing class CPButtonsExt {
         maintenanceCP.Parent_Campaign__c = cp.Id;
         String cpName = cp.Campaign_Profile_Name__c + ' - ' +requestType;
         maintenanceCP.Campaign_Profile_Name__c = StringFormatter.autoTruncate(cpName);
-        maintenanceCP.Processes_To_Run__c = requestType;
+        if(requestType == RECURRING_MAINTENANCE_REQUEST){
+          maintenanceCP.Processes_To_Run__c = requestType;  
+        }
         Set<String> fieldsToSync = new Set<String>(fieldSet);
         Set<String> removeKeys = new Set<String>{
             'RecordType.DeveloperName', 'RecordType.Name','Begin_Build_Process__c','Post_Live_Maintenance__c','Campaign_Profile_Strikes_Back__c','Strategy_Session__c',
@@ -222,7 +224,7 @@ public without sharing class CPButtonsExt {
         
     }
 
-    private void getCPfields2query(){
+    private void populateCPfields2query(){
         List<String> roleAssignmentFields = CampaignProfileCache.getRole2CPfieldMap().values();
         fieldSet = new Set<String>{
                 'Begin_Build_Process__c', 'Post_Live_Maintenance__c', 'Opportunity_Product_ID__c', 'RecordTypeId',
