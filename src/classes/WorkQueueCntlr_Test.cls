@@ -12,10 +12,13 @@ public class WorkQueueCntlr_Test {
 	    
 	    List<User> usrList = [select Id, ManagerId
 	                    from User 
-	                    where Id <> :UserInfo.getUserId() and isActive = true limit 2];
+	                    where Id <> :UserInfo.getUserId() and isActive = true limit 3];
 	    usrList[0].ManagerId = UserInfo.getUserId();
 	    
 	    update usrList;
+	    List<Delegate_User__c> delUserList = new List<Delegate_User__c>();
+	    delUserList.add(new Delegate_User__c(User__c = usrList[2].Id, User_Delegate__c = UserInfo.getUserId()));
+	    insert delUserList;
 	    
 	    Account acct = new Account(Name = 'Test');
 	    insert acct;
@@ -57,6 +60,12 @@ public class WorkQueueCntlr_Test {
 	       cursorList.add(cursor);
 	    }
 	    insert cursorList;
+	    
+	    List<WR_BPM__Flow_Instance_Issue__c> issueList = new List<WR_BPM__Flow_Instance_Issue__c>();
+	    issueList.add(new WR_BPM__Flow_Instance_Issue__c(WR_BPM__Flow_Instance__c = flowInst.Id, WR_BPM__Step__c = step.Id, WR_BPM__Status__c = 'In Progress',
+	          WR_BPM__Assign_To__c = UserInfo.getUserId(), CampaignProfile__c = cp.Id));
+	    insert issueList;
+	    
 	    List<WR_BPM__Flow_Step_Property__c> propList = new List<WR_BPM__Flow_Step_Property__c>();
 	    for(Integer p=1; p<5; p++){
 	        WR_BPM__Flow_Step_Property__c prop = new WR_BPM__Flow_Step_Property__c
