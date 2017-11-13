@@ -223,6 +223,21 @@
         <field>Social_Ads_Product__c.Targeted_Gender__c</field>
         <readable>true</readable>
     </fieldPermissions>
+	<fieldPermissions>
+        <editable>false</editable>
+        <field>OpportunityLineItem.Notify_OLI_Expiration__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>OpportunityLineItem.Send_Expiration_Notification__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Product2.Notify_OLI_Expiration__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <loginHours/>
     <userLicense>Salesforce</userLicense>
 </Profile>

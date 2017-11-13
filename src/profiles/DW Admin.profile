@@ -5,6 +5,16 @@
         <field>OnBoardFormModel__c.Domain_Transfer_Fee__c</field>
         <readable>true</readable>
     </fieldPermissions>
+	<fieldPermissions>
+        <editable>false</editable>
+        <field>OpportunityLineItem.Notify_OLI_Expiration__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Product2.Notify_OLI_Expiration__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <loginHours/>
     <userLicense>Salesforce</userLicense>
 </Profile>

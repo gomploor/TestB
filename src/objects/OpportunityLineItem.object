@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <fullName>Notify_OLI_Expiration__c</fullName>
+        <description>It is a reference to Product&apos;s &apos;Notify OLI Expiration&apos; field, which is used to trigger the time-based workflow, to notify the expiration status of the &apos;Live Products&apos;.</description>
+        <externalId>false</externalId>
+        <formula>PricebookEntry.Product2.Notify_OLI_Expiration__c</formula>
+        <label>Notify OLI Expiration</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Send_Expiration_Notification__c</fullName>
+        <defaultValue>false</defaultValue>
+        <description>This is a temporary field in reference to story DEV-13332 and is used to trigger the time-based workflow, to notify the expiration status of the existing &apos;Live Products&apos; as of 11/16/2017. This field will be deleted shortly.</description>
+        <externalId>false</externalId>
+        <label>Send Expiration Notification</label>
+        <type>Checkbox</type>
+    </fields>
+</CustomObject>
