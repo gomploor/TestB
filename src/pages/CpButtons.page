@@ -68,7 +68,7 @@
                     </apex:actionStatus>
                     <!-- END NEW ISSUES BUTTON --> 
 
-                    <!-- DEV-15064 NEW ISSUES BUTTON -->
+                    <!-- DEV-15064 Monthly Maintenance BUTTON -->
                     <apex:actionStatus id="RecurringMaintenanceStatus">
                         <apex:facet name="start">
                              <apex:image value="{!URLFOR($Resource.spinner)}" width="40" height="10"/>
