@@ -25,6 +25,14 @@
 		<members>User.Delegated_User__c</members>	
         <name>CustomField</name>
     </types>
-
+	<types>
+        <members>AA_WRproceedStepInterim</members>
+        <members>AA_WRproceedStepInterim_Test</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>Scheduler.AA_WRproceedStepInterim</members>
+        <name>CustomMetadata</name>
+    </types>
     <version>37.0</version>
 </Package>
