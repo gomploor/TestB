@@ -84,6 +84,7 @@
 			<runTest>ChatterIssues_Test</runTest>			
 			<runTest>RecurringMaintenanceCampaign_Test</runTest>
 			<runTest>CPButtonsExt_Test</runTest>
+			<runTest>CPAfterUpdateTriggerHandler_Test</runTest>
 		</sf:deploy>		
 	</target>
 	
