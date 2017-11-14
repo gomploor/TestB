@@ -83,6 +83,7 @@
 			<runTest>FIIAfterInsertTriggerHandler_Test</runTest>	
 			<runTest>ChatterIssues_Test</runTest>			
 			<runTest>RecurringMaintenanceCampaign_Test</runTest>
+			<runTest>CPButtonsExt_Test</runTest>
 		</sf:deploy>		
 	</target>
 	
