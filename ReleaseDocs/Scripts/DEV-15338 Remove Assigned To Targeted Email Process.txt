@@ -1,0 +1,65 @@
+/*
+The following Script updates 
+Process Path:
+		Process Tab
+		Targeted Email> 
+		Targeted Email Build Processes>
+		Targeted Email Build Sub Processes>
+
+Process Name: Onboarding/Asset Collection
+Step Name : QA Criteria Sheet
+
+Process Name: Custom Design 
+Step Name : Peer Design Proof QA
+
+Process Name: Custom Design 
+Step1 Name : Peer Design Proof QA
+Step2 Name : Deployment QA
+
+Process Name: Client Provided
+Step Name : Deployment to QA
+
+Process Name: Template/Theme
+Step Name : Deployment to QA
+
+Desciption of change:  
+Remove Assigned To From the Configuration of 'Create QA Record' Action
+*/ 
+Set<String> targetStepsGuid = new Set<String>();
+targetStepsGuid.add('00DA0000000HEOtMAOb575519f501c2e8bfd3a8bf969b655f1'); //Onboarding/Asset Collection
+targetStepsGuid.add('00DA0000000HEOtMAOa7fde6082a60d7a7c72f21f8fdd0bdf3'); //Custom Design
+targetStepsGuid.add('00DA0000000HEOtMAO1b5aa1eca89d051622fbcba0545ce56d'); //Custom Design
+targetStepsGuid.add('00DA0000000HEOtMAO596357c9f89682949307756e5fd60b88'); //Client Provided 
+targetStepsGuid.add('00DA0000000HEOtMAOe6422b3de3bdcf79b8bc644d95bc8c7e'); //Template/Theme
+
+//Query Target Actions and Check for only 'Create QA Record' Records
+List<WR_BPM__Flow_Step_Action__c> targetStepActions = 
+			[Select Id, Name, WR_BPM__Config__c   from WR_BPM__Flow_Step_Action__c 
+				Where WR_BPM__Flow_Step__r.WR_BPM__Guid__c IN:targetStepsGuid  
+				and Name = 'Create QA Record']; 
+				
+for(WR_BPM__Flow_Step_Action__c oneStepAction: targetStepActions){ 
+	Map<String, Object> cObjMap = (Map<String, Object>) JSON.deserializeUntyped(oneStepAction.WR_BPM__Config__c);
+	List<Object> fieldsList = (List<Object>) cObjMap.get('fields');
+	System.debug(JSON.SerializePretty(cObjMap));
+	Integer removefieldIndex = 0;
+	Boolean removefieldFlag = false;
+	for(Object oneField: fieldsList){
+		Map<String, Object> fieldMap = (Map<String, Object>)oneField;
+		if(fieldMap.get('fieldName')!=null 
+	         && String.ValueOf(fieldMap.get('fieldName')).equalsIgnoreCase('assigned_to__c')){  
+	          System.debug('found assigned_to__c field update'); 
+	          removefieldFlag = true; //found assigned_to__c field update
+	    }else{ 
+	         removefieldIndex++;
+	    }
+	}
+	
+    if(removefieldFlag){
+       fieldsList.remove(removefieldIndex);
+       oneStepAction.WR_BPM__Config__c = JSON.Serialize(cObjMap);
+    }
+	System.debug(JSON.SerializePretty(cObjMap));
+}    
+//update targetStepActions;
+   
