@@ -76,7 +76,7 @@
                         </apex:facet>    
                         <apex:facet name="stop">
                             <apex:commandLink action="{!recurMaint}" status="RecurringMaintenanceStatus"
-                                value="Monthly Maintenance" styleClass="slds-button slds-button--neutral" 
+                                value="Monthly Maintenance" styleClass="slds-button slds-button--neutral" rerender="buttons" 
                                 type="button" rendered="{!renderRecurringMaintenance}">
                             </apex:commandLink>
                         </apex:facet>
