@@ -73,7 +73,7 @@
             <name>Email_Count_Thank_You_Email_Gannet</name>
             <type>Alert</type>
         </actions>
-        <active>false</active>
+        <active>true</active>
         <criteriaItems>
             <field>Case.RecordTypeId</field>
             <operation>equals</operation>
