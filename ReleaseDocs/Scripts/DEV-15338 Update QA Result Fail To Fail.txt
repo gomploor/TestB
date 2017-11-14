@@ -1,0 +1,49 @@
+/*
+The following Script updates 
+Process Path:
+		Process Tab
+		Targeted Email> 
+		Targeted Email Build Processes>
+		Targeted Email Build Sub Processes>
+
+Process Name: Onboarding/Asset Collection
+Step Name : QA Criteria Sheet
+
+Process Name: Custom Design 
+Step Name : Peer Design Proof QA
+
+Process Name: Custom Design 
+Step1 Name : Peer Design Proof QA
+Step2 Name : Deployment QA
+
+Process Name: Client Provided
+Step Name : Deployment to QA
+
+Process Name: Template/Theme
+Step Name : Deployment to QA
+
+Desciption of change:  
+Update 'QA Result Fail' Step Action to Fail Status
+*/ 
+//Query Target Actions and Check for only 'QA Result Fail' Records
+List<WR_BPM__Flow_Step_Action__c> targetStepActions = 
+			[Select Id, Name, WR_BPM__Config__c   from WR_BPM__Flow_Step_Action__c 
+				Where Name = 'QA Result Fail']; 
+				
+for(WR_BPM__Flow_Step_Action__c oneStepAction: targetStepActions){ 
+	Map<String, Object> cObjMap = (Map<String, Object>) JSON.deserializeUntyped(oneStepAction.WR_BPM__Config__c);
+	List<Object> fieldsList = (List<Object>) cObjMap.get('fields');
+	System.debug(JSON.SerializePretty(cObjMap)); 
+	for(Object oneField: fieldsList){
+		Map<String, Object> fieldMap = (Map<String, Object>)oneField;
+		if(fieldMap.get('fieldName')!=null && fieldMap.get('fieldValue')!=null
+	         && String.ValueOf(fieldMap.get('fieldName')).equalsIgnoreCase('status__c')
+			 && String.ValueOf(fieldMap.get('fieldValue')).equalsIgnoreCase('Pass')){  
+	          System.debug('found QA Result Fail with Status Pass, Updating to Fail');  
+			  fieldMap.put('fieldValue','Fail');
+			  oneStepAction.WR_BPM__Config__c = JSON.Serialize(cObjMap);
+	    } 
+	} 
+	System.debug(JSON.SerializePretty(cObjMap));
+}    
+update targetStepActions;

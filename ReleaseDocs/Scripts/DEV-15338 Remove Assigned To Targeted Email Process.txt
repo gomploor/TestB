@@ -61,5 +61,5 @@ for(WR_BPM__Flow_Step_Action__c oneStepAction: targetStepActions){
     }
 	System.debug(JSON.SerializePretty(cObjMap));
 }    
-//update targetStepActions;
+update targetStepActions;
    
