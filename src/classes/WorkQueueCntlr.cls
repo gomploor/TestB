@@ -336,48 +336,48 @@ public without sharing class WorkQueueCntlr extends WorkQueueVir{
                       cr = new CalendarRow();
                    cr.tueTaskName = dateTaskMap.get(dateList[1])[i].taskNameAbbr;
                    cr.tueCpName = dateTaskMap.get(dateList[1])[i].abbrCpName;
-                   cr.tueTaskNameFull = dateTaskMap.get(dateList[0])[i].taskName;
-                   cr.tueCpNameFull = dateTaskMap.get(dateList[0])[i].cpName;
+                   cr.tueTaskNameFull = dateTaskMap.get(dateList[1])[i].taskName;
+                   cr.tueCpNameFull = dateTaskMap.get(dateList[1])[i].cpName;
                    cr.tueCpId =  dateTaskMap.get(dateList[1])[i].cpId;
                    cr.tueProcUrl =  dateTaskMap.get(dateList[1])[i].proceedUrl;
                    cr.tuePrior =  dateTaskMap.get(dateList[1])[i].priority;
-                   cr.tuePriorText =  dateTaskMap.get(dateList[0])[i].priorityText;
+                   cr.tuePriorText =  dateTaskMap.get(dateList[1])[i].priorityText;
                }
                if(dateTaskMap.containsKey(dateList[2]) && dateTaskMap.get(dateList[2]).size() > i){
                    if(cr == null)
                       cr = new CalendarRow();
                    cr.wedTaskName = dateTaskMap.get(dateList[2])[i].taskNameAbbr;
                    cr.wedCpName = dateTaskMap.get(dateList[2])[i].abbrCpName;
-                   cr.wedTaskNameFull = dateTaskMap.get(dateList[0])[i].taskName;
-                   cr.wedCpNameFull = dateTaskMap.get(dateList[0])[i].cpName;
+                   cr.wedTaskNameFull = dateTaskMap.get(dateList[2])[i].taskName;
+                   cr.wedCpNameFull = dateTaskMap.get(dateList[2])[i].cpName;
                    cr.wedCpId =  dateTaskMap.get(dateList[2])[i].cpId;
                    cr.wedProcUrl =  dateTaskMap.get(dateList[2])[i].proceedUrl;
                    cr.wedPrior =  dateTaskMap.get(dateList[2])[i].priority;
-                   cr.wedPriorText =  dateTaskMap.get(dateList[0])[i].priorityText;
+                   cr.wedPriorText =  dateTaskMap.get(dateList[2])[i].priorityText;
                }
                if(dateTaskMap.containsKey(dateList[3]) && dateTaskMap.get(dateList[3]).size() > i){
                    if(cr == null)
                       cr = new CalendarRow();
                    cr.thuTaskName = dateTaskMap.get(dateList[3])[i].taskNameAbbr;
                    cr.thuCpName = dateTaskMap.get(dateList[3])[i].abbrCpName;
-                   cr.thuTaskNameFull = dateTaskMap.get(dateList[0])[i].taskName;
-                   cr.thuCpNameFull = dateTaskMap.get(dateList[0])[i].cpName;
+                   cr.thuTaskNameFull = dateTaskMap.get(dateList[3])[i].taskName;
+                   cr.thuCpNameFull = dateTaskMap.get(dateList[3])[i].cpName;
                    cr.thuCpId =  dateTaskMap.get(dateList[3])[i].cpId;
                    cr.thuProcUrl =  dateTaskMap.get(dateList[3])[i].proceedUrl;
                    cr.thuPrior =  dateTaskMap.get(dateList[3])[i].priority;
-                   cr.thuPriorText =  dateTaskMap.get(dateList[0])[i].priorityText;
+                   cr.thuPriorText =  dateTaskMap.get(dateList[3])[i].priorityText;
                }
                if(dateTaskMap.containsKey(dateList[4]) && dateTaskMap.get(dateList[4]).size() > i){
                    if(cr == null)
                       cr = new CalendarRow();
                    cr.friTaskName = dateTaskMap.get(dateList[4])[i].taskNameAbbr;
                    cr.friCpName = dateTaskMap.get(dateList[4])[i].abbrCpName;
-                   cr.friTaskNameFull = dateTaskMap.get(dateList[0])[i].taskName;
-                   cr.friCpNameFull = dateTaskMap.get(dateList[0])[i].cpName;
+                   cr.friTaskNameFull = dateTaskMap.get(dateList[4])[i].taskName;
+                   cr.friCpNameFull = dateTaskMap.get(dateList[4])[i].cpName;
                    cr.friCpId =  dateTaskMap.get(dateList[4])[i].cpId;
                    cr.friProcUrl =  dateTaskMap.get(dateList[4])[i].proceedUrl;
                    cr.friPrior =  dateTaskMap.get(dateList[4])[i].priority;
-                   cr.friPriorText =  dateTaskMap.get(dateList[0])[i].priorityText;
+                   cr.friPriorText =  dateTaskMap.get(dateList[4])[i].priorityText;
                }
                if(cr != null)
                   calendarList.add(cr);
