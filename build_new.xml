@@ -88,6 +88,8 @@
 			<runTest>QAResultsFormRenderer_Test</runTest>
 			<runTest>BillingScheduleCompCntrl_Test</runTest>
 			<runTest>WorkQueueCntlr_Test</runTest>
+			<runTest>PushDataChangeRequest2CPprofile_Test</runTest>
+			<runTest>FlowInstanceBehavioral_Test</runTest>
 		</sf:deploy>		
 	</target>
 	
