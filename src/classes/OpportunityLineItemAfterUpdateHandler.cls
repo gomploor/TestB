@@ -739,13 +739,14 @@ public class OpportunityLineItemAfterUpdateHandler extends TriggerHandlerBase{
        if(OpportunityLineItemTriggerDispatcher.relatedCentralCampaignProfiles != null && !OpportunityLineItemTriggerDispatcher.relatedCentralCampaignProfiles.isEmpty()){
            //Loop through all central campaign profiles
            for(Campaign_Profile__c centralCP : OpportunityLineItemTriggerDispatcher.relatedCentralCampaignProfiles.values()){
-              Campaign_Profile__c cp2update = (Campaign_Profile__c)this.getReferenceToSobjectsToUpdateRecord(centralCP.ID);
               //sanity check
               if(newOLImap.containsKey(centralCP.Opportunity_Product_ID__c)){
                   //DEV-12210 >> if Marketing_Campaign__c value changed, update related Central Campaign Profile
-                  if(oldOLImap.get(centralCP.Opportunity_Product_ID__c).Marketing_Campaign__c != newOLImap.get(centralCP.Opportunity_Product_ID__c).Marketing_Campaign__c)
-                    cp2update.Marketing_Campaign__c = newOLImap.get(centralCP.Opportunity_Product_ID__c).Marketing_Campaign__c;
-              }
+                  if(oldOLImap.get(centralCP.Opportunity_Product_ID__c).Marketing_Campaign__c != newOLImap.get(centralCP.Opportunity_Product_ID__c).Marketing_Campaign__c){
+                    Campaign_Profile__c cp2update = (Campaign_Profile__c)this.getReferenceToSobjectsToUpdateRecord(centralCP.ID);
+					cp2update.Marketing_Campaign__c = newOLImap.get(centralCP.Opportunity_Product_ID__c).Marketing_Campaign__c;
+				  }
+			  }
            }
        }
     }
