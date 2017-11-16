@@ -87,6 +87,7 @@
 			<runTest>CPAfterUpdateTriggerHandler_Test</runTest>
 			<runTest>QAResultsFormRenderer_Test</runTest>
 			<runTest>BillingScheduleCompCntrl_Test</runTest>
+			<runTest>WorkQueueCntlr_Test</runTest>
 		</sf:deploy>		
 	</target>
 	
